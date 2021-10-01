@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<ruleset name="MyRuleSet"
+	xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">>
+
+	<description>A custome rule set, created to find 3 well known bad smells. GodClass, LongMethod, LongParameterList</description>
+
+	<rule ref="category/java/design.xml/GodClass" />
+	<rule ref="category/java/design.xml/ExcessiveMethodLength" />
+	<rule ref="category/java/design.xml/ExcessiveParameterList" />
+	
+</ruleset>

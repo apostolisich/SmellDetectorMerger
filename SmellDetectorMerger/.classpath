@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/antlr-2.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/ccl.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/cm.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/dom4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/hibernate-commons-annotations-4.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/hibernate-core-4.1.10.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/hsqldb.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jackson-asl-0.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/javacc.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/javancss.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/javassist-3.15.0-GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jboss-logging-3.1.0.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jboss-transaction-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jdeodorant_plugin.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgraph-5.13.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgrapht-core-0.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgrapht-demo-0.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgrapht-ext-0.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgrapht-ext-0.9.0-uber.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jgraphx-2.0.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/jhbasic.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdeodorant/sqltool.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/antlr-2.7.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/dom4j-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/hibernate-commons-annotations-4.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/hibernate-core-4.1.10.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/hsqldb.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/javassist-3.15.0-GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/jboss-logging-3.1.0.GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/jboss-transaction-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jspirit/jspirit_plugin.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
