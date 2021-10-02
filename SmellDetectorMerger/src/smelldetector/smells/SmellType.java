@@ -1,4 +1,4 @@
-package smelldetectormerger.detectors;
+package smelldetector.smells;
 
 public enum SmellType {
 	
@@ -6,7 +6,7 @@ public enum SmellType {
 	LONG_METHOD,
 	LONG_PARAMETER_LIST,
 	FEATURE_ENVY,
-	DUPLICATED_CODE,
+	DUPLICATE_CODE,
 	TYPE_CHECKING
 
 }

@@ -1,138 +1,148 @@
 package smelldetectormerger.detectors;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
-//import org.eclipse.ui.console.ConsolePlugin;
-//import org.eclipse.ui.console.IConsole;
-//import org.eclipse.ui.console.MessageConsole;
-//import org.eclipse.ui.console.MessageConsoleStream;
 import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import smelldetector.smells.DuplicateCode;
+import smelldetector.smells.SmellType;
+import smelldetector.smells.Smellable;
+import smelldetectormerger.utilities.Duplication;
+import smelldetectormerger.utilities.Utils;
 
 public class PMDSmellDetector extends SmellDetector {
 	
-	// formatter: off
+	private Bundle bundle;
+	private IJavaProject javaProject;
+	
+	public PMDSmellDetector(Bundle bundle, IJavaProject javaProject) {
+		this.bundle = bundle;
+		this.javaProject = javaProject;
+	}
+	
+	/**
+	 * A map that contains the code smells detected from the tool as the key, and their
+	 * corresponding {@code SmellType} as the value.
+	 */
+	private static final Map<String, SmellType> MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE;
+	static {
+		Map<String, SmellType> tempMap = new HashMap<String, SmellType>(4);
+		tempMap.put("GodClass", SmellType.GOD_CLASS);
+		tempMap.put("ExcessiveMethodLength", SmellType.LONG_METHOD);
+		tempMap.put("ExcessiveParameterList", SmellType.LONG_PARAMETER_LIST);
+		MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE = Collections.unmodifiableMap(tempMap);
+	}
+	
+	@Override
+	public List<Smellable> findSmells(SmellType smellType) throws Exception {
+		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
+		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
+		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
+		File cpdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/cpd.bat");
+		
+		if(smellType.equals(SmellType.DUPLICATE_CODE)) {
+			String commandOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile));
+			Document xmlDoc = Utils.getXmlDocument(commandOutput);
+			System.out.println(commandOutput);
+			
+			return extractDuplicates(xmlDoc);
+		} else {
+			String commandOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile));
+			Document xmlDoc = Utils.getXmlDocument(commandOutput);
+				
+			return extractSmells(xmlDoc, smellType);
+		}
+	}
+	
+	/**
+	 * Extracts Duplicate Code smells and returns a list that contains all of them.
+	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
+	 * @return a list which contains all the duplicate code smells
+	 */
+	private List<Smellable> extractDuplicates(Document xmlDoc) {
+		List<Smellable> detectedDuplicates = new ArrayList<Smellable>();
+		
+		NodeList duplicationNodes = xmlDoc.getDocumentElement().getElementsByTagName("duplication");
+		for(int i = 0; i < duplicationNodes.getLength(); i++) {
+			List<Duplication> duplications = new ArrayList<Duplication>();
+			
+			NodeList fileEntries = duplicationNodes.item(i).getChildNodes();
+			for(int j = 0; j < fileEntries.getLength(); j++) {
+				Node fileEntry = fileEntries.item(j);
+				//Each duplication has a <codefragment> element which only contains the code and
+				//doesn't have any attributes. So they are recognized this way and are ignored
+				if(!fileEntry.hasAttributes())
+					continue;
+				
+				NamedNodeMap fileEntryAttributes = fileEntry.getAttributes();
+				int startLine = Integer.parseInt(fileEntryAttributes.getNamedItem("line").getNodeValue());
+				int endLine = Integer.parseInt(fileEntryAttributes.getNamedItem("endline").getNodeValue());
+				String path = fileEntryAttributes.getNamedItem("path").getNodeValue();
+				String className = path.substring(path.lastIndexOf("\\") + 1);
+				
+				duplications.add(new Duplication(className, startLine, endLine));
+			}
+			detectedDuplicates.add(new DuplicateCode(duplications));
+		}
+		
+		return detectedDuplicates;
+	}
+
+	/**
+	 * Extracts God Class, Long Method and Long Parameter List code smells and returns a list
+	 * that contains all of them.
+	 * 
+	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
+	 * @param smellType the type of the requested smell to be checked
+	 * @return a list which contains all the detected smells of the given smell type
+	 * @throws Exception
+	 */
+	private List<Smellable> extractSmells(Document xmlDoc, SmellType smellType) throws Exception {
+		List<Smellable> detectedSmells = new ArrayList<Smellable>();
+		
+		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
+		for(int i = 0; i < fileNodes.getLength(); i++) {
+			NodeList violationNodes = fileNodes.item(i).getChildNodes();
+			for(int j = 0; j < violationNodes.getLength(); j++) {
+				Node violationNode = violationNodes.item(j);
+				String detectedSmell = violationNode.getAttributes().getNamedItem("rule").getNodeValue();
+				
+				if(MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell) != smellType)
+					continue;
+				
+				String className = violationNode.getAttributes().getNamedItem("class").getNodeValue();
+				if(smellType.equals(SmellType.GOD_CLASS)) {
+					detectedSmells.add(Utils.createSmellObject(smellType, className));
+				} else {
+					String methodName = violationNode.getAttributes().getNamedItem("method").getNodeValue();
+					detectedSmells.add(Utils.createSmellObject(smellType, className, methodName));
+				}
+			}
+		}
+		
+		return detectedSmells;
+	}
+
 	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
-			new HashSet<SmellType>(Arrays.asList(SmellType.DUPLICATED_CODE,
+			new HashSet<SmellType>(Arrays.asList(SmellType.DUPLICATE_CODE,
 												SmellType.GOD_CLASS,
 												SmellType.LONG_METHOD,
 												SmellType.LONG_PARAMETER_LIST)));
-	// formatter: on
 	
-	public static void findSmells(Bundle bundle, IJavaProject javaProject) {
-		URL pmdBatUrl = FileLocator.find(bundle, new Path("pmd-bin-6.37.0/bin/pmd.bat"), null);
-		URL pmdConfigUrl = FileLocator.find(bundle, new Path("pmd-bin-6.37.0/bin/pmd-config.xml"), null);
-		URL cpdBatUrl = FileLocator.find(bundle, new Path("pmd-bin-6.37.0/bin/cpd.bat"), null);
-
-		File pmdBatFile = null;
-		File pmdConfigFile = null;
-		File cpdBatFile = null;
-		try {
-			pmdBatUrl = FileLocator.toFileURL(pmdBatUrl);
-			pmdBatFile = URIUtil.toFile(URIUtil.toURI(pmdBatUrl));
-
-			pmdConfigUrl = FileLocator.toFileURL(pmdConfigUrl);
-			pmdConfigFile = URIUtil.toFile(URIUtil.toURI(pmdConfigUrl));
-			
-			cpdBatUrl = FileLocator.toFileURL(cpdBatUrl);
-			cpdBatFile = URIUtil.toFile(URIUtil.toURI(cpdBatUrl));
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
-		List<String> pmdCmdList = new ArrayList<String>();
-		pmdCmdList.add("cmd");
-		pmdCmdList.add("/c");
-		pmdCmdList.add(pmdBatFile.getAbsolutePath());
-		pmdCmdList.add("-d");
-		try {
-			pmdCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
-		} catch (JavaModelException e1) {
-			e1.printStackTrace();
-		}
-		pmdCmdList.add("-f");
-		pmdCmdList.add("xml");
-		pmdCmdList.add("-R");
-		pmdCmdList.add(pmdConfigFile.getAbsolutePath());
-		
-		ProcessBuilder pb = new ProcessBuilder(pmdCmdList);
-		pb.redirectErrorStream(true);
-		
-//		MessageConsole console = new MessageConsole("My Console", null);
-//		console.activate();
-//		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{ console });
-//		MessageConsoleStream stream = console.newMessageStream();
-		
-		try {
-			Process p = pb.start();
-			
-			BufferedReader reader=new BufferedReader(new InputStreamReader(p.getInputStream())); 
-			String line;
-			while((line = reader.readLine()) != null) {
-				System.out.println(line);
-//				stream.println(line);
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		List<String> cpdCmdList = new ArrayList<String>();
-		cpdCmdList.add("cmd");
-		cpdCmdList.add("/c");
-		cpdCmdList.add(cpdBatFile.getAbsolutePath());
-		cpdCmdList.add("--minimum-tokens");
-		cpdCmdList.add("100");
-		cpdCmdList.add("--files");
-		try {
-			cpdCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		cpdCmdList.add("--format");
-		cpdCmdList.add("xml");
-		
-		pb = new ProcessBuilder(cpdCmdList);
-		pb.redirectErrorStream(true);
-		
-		try {
-			Process p = pb.start();
-			
-			BufferedReader reader=new BufferedReader(new InputStreamReader(p.getInputStream())); 
-			String line;
-			while((line = reader.readLine()) != null) {
-				System.out.println(line);
-//				stream.println(line);
-			}
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void findSmells(SmellType smellType) {
-		// TODO Auto-generated method stub
-
-	}
-
 	@Override
 	public Set<SmellType> getSupportedSmellTypes() {
 		return SUPPORTED_SMELL_TYPES;
@@ -143,4 +153,59 @@ public class PMDSmellDetector extends SmellDetector {
 		return "PMD";
 	}
 	
+	/**
+	 * Builds a list that includes (in parts) the needed command to trigger the main tool via
+	 * the command line and produce the smell detection results.
+	 * 
+	 * @param mainToolBatFile the file of the main tool
+	 * @param configFile the configuration file of the main tool
+	 * @param javaProject the selected java project for smell detection
+	 * @return a list with the needed command
+	 */
+	private List<String> buildMainToolCommand(File mainToolBatFile, File configFile, File cacheFile) {
+		List<String> mainToolCmdList = new ArrayList<String>();
+		try {
+			mainToolCmdList.add("cmd");
+			mainToolCmdList.add("/c");
+			mainToolCmdList.add(mainToolBatFile.getAbsolutePath());
+			mainToolCmdList.add("-d");
+			mainToolCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
+			mainToolCmdList.add("-cache");
+			mainToolCmdList.add(cacheFile.getAbsolutePath());
+			mainToolCmdList.add("-f");
+			mainToolCmdList.add("xml");
+			mainToolCmdList.add("-R");
+			mainToolCmdList.add(configFile.getAbsolutePath());
+		} catch (JavaModelException e1) {
+			e1.printStackTrace();
+		}
+		
+		return mainToolCmdList;
+	}
+	
+	/**
+	 * Builds a list that includes (in parts) the needed command to trigger the duplicate
+	 * code tool via the command line and produce the detection results.
+	 * 
+	 * @param duplicateCodeToolBatFile the file of the duplicate code tool
+	 * @return a list with the needed command
+	 */
+	private List<String> buildDuplicateCodeToolCommand(File duplicateCodeToolBatFile) {
+		List<String> duplicateCodeToolCmdList = new ArrayList<String>();
+		try {
+			duplicateCodeToolCmdList.add("cmd");
+			duplicateCodeToolCmdList.add("/c");
+			duplicateCodeToolCmdList.add(duplicateCodeToolBatFile.getAbsolutePath());
+			duplicateCodeToolCmdList.add("--minimum-tokens");
+			duplicateCodeToolCmdList.add("100");
+			duplicateCodeToolCmdList.add("--files");
+			duplicateCodeToolCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
+			duplicateCodeToolCmdList.add("--format");
+			duplicateCodeToolCmdList.add("xml");
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
+		
+		return duplicateCodeToolCmdList;
+	}
 }
