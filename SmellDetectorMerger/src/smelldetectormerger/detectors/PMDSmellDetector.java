@@ -57,7 +57,6 @@ public class PMDSmellDetector extends SmellDetector {
 		if(smellType.equals(SmellType.DUPLICATE_CODE)) {
 			String commandOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile));
 			Document xmlDoc = Utils.getXmlDocument(commandOutput);
-			System.out.println(commandOutput);
 			
 			return extractDuplicates(xmlDoc);
 		} else {
@@ -83,8 +82,8 @@ public class PMDSmellDetector extends SmellDetector {
 			NodeList fileEntries = duplicationNodes.item(i).getChildNodes();
 			for(int j = 0; j < fileEntries.getLength(); j++) {
 				Node fileEntry = fileEntries.item(j);
-				//Each duplication has a <codefragment> element which only contains the code and
-				//doesn't have any attributes. So they are recognized this way and are ignored
+				//Each duplication has a <codefragment> element which only contains the duplicate code
+				//and doesn't have any attributes. So this is recognized this way and is ignored
 				if(!fileEntry.hasAttributes())
 					continue;
 				

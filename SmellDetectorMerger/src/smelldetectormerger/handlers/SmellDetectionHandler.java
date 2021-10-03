@@ -21,7 +21,7 @@ import smelldetector.smells.Smellable;
 import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.PMDSmellDetector;
 
-public class SampleHandler extends AbstractHandler {
+public class SmellDetectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
