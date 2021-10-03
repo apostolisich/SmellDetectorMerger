@@ -37,5 +37,14 @@
          </menu>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+          <view
+            name="SmellDetectorMerger Smells View"
+            icon="icons/sample.png"
+            class="smelldetectormerger.views.SmellsView"
+            id="smelldetectormerger.views.SmellsView">
+      </view>
+   </extension>
 
 </plugin>

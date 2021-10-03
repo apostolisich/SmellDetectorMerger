@@ -48,7 +48,7 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	@Override
-	public List<Smellable> findSmells(SmellType smellType) throws Exception {
+	public Set<Smellable> findSmells(SmellType smellType) throws Exception {
 		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
 		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
 		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
@@ -72,8 +72,8 @@ public class PMDSmellDetector extends SmellDetector {
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
 	 * @return a list which contains all the duplicate code smells
 	 */
-	private List<Smellable> extractDuplicates(Document xmlDoc) {
-		List<Smellable> detectedDuplicates = new ArrayList<Smellable>();
+	private Set<Smellable> extractDuplicates(Document xmlDoc) {
+		Set<Smellable> detectedDuplicates = new HashSet<Smellable>();
 		
 		NodeList duplicationNodes = xmlDoc.getDocumentElement().getElementsByTagName("duplication");
 		for(int i = 0; i < duplicationNodes.getLength(); i++) {
@@ -110,8 +110,8 @@ public class PMDSmellDetector extends SmellDetector {
 	 * @return a list which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
-	private List<Smellable> extractSmells(Document xmlDoc, SmellType smellType) throws Exception {
-		List<Smellable> detectedSmells = new ArrayList<Smellable>();
+	private Set<Smellable> extractSmells(Document xmlDoc, SmellType smellType) throws Exception {
+		Set<Smellable> detectedSmells = new HashSet<Smellable>();
 		
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int i = 0; i < fileNodes.getLength(); i++) {

@@ -1,6 +1,5 @@
 package smelldetectormerger.detectors;
 
-import java.util.List;
 import java.util.Set;
 
 import smelldetector.smells.Smellable;
@@ -13,8 +12,9 @@ public abstract class SmellDetector {
 	 * given smell type.
 	 * 
 	 * @param smellType the smell type to check for
+	 * @return a {@code Set} of detected smells
 	 */
-	public abstract List<Smellable> findSmells(SmellType smellType) throws Exception;
+	public abstract Set<Smellable> findSmells(SmellType smellType) throws Exception;
 	
 	/**
 	 * A method that returns all the code smell types that can be found from the
