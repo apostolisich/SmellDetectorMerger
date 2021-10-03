@@ -27,7 +27,19 @@ public class SmellDetectionHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
-		IProject selectedProject = (IProject) (((StructuredSelection) selection).getFirstElement());
+		IProject selectedProject = null;
+		try {
+			selectedProject = (IProject) (((StructuredSelection) selection).getFirstElement());
+		} catch(ClassCastException ex) {
+			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+			MessageDialog.openInformation(
+					window.getShell(),
+					"SmellDetectorMerger",
+					"Please select the project's root folder and try again...");
+			
+			return null;
+		}
+		
 		IJavaProject javaProject = JavaCore.create(selectedProject);
 		Bundle bundle = Activator.getDefault().getBundle();
 		
@@ -44,11 +56,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 //		JDeodorantSmellDetector.findSmells(bundle, javaProject);
 //		DuDeSmellDetector.findSmells(bundle, javaProject);
 		
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		MessageDialog.openInformation(
-				window.getShell(),
-				"SmellDetectorMerger",
-				"Hello, Eclipse world");
+		
 		return null;
 	}
 }
