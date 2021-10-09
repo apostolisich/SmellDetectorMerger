@@ -63,7 +63,7 @@ public class SmellsView extends ViewPart {
 			}
 		});
 		
-		TableViewerColumn affectedElementColumn = createNewColumn("Affected Element", 250);
+		TableViewerColumn affectedElementColumn = createNewColumn("Affected Element", 300);
 		affectedElementColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {

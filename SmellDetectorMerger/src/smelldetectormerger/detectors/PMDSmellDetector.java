@@ -141,7 +141,7 @@ public class PMDSmellDetector extends SmellDetector {
 	 * @throws Exception
 	 */
 	private Set<Smell> extractSmells(Document xmlDoc) throws Exception {
-		Set<Smell> detectedSmells = new HashSet<Smell>();
+		Set<Smell> detectedSmells = new LinkedHashSet<Smell>();
 
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int fileIndex = 0; fileIndex < fileNodes.getLength(); fileIndex++) {
