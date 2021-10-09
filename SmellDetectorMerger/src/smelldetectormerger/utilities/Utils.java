@@ -71,6 +71,10 @@ public abstract class Utils {
 					
 			String line;
 			while((line = reader.readLine()) != null) {
+				//Skipping unnecessary line from CheckStyle tool
+				if(line.startsWith("Checkstyle ends with"))
+					continue;
+				
 				output.append(line);
 				output.append("\n");
 			}

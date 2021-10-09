@@ -85,6 +85,32 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	/**
+	 * Builds a list that includes (in parts) the needed command to trigger the duplicate
+	 * code tool via the command line and produce the detection results.
+	 * 
+	 * @param duplicateCodeToolBatFile the file of the duplicate code tool
+	 * @return a list with the needed command
+	 */
+	private List<String> buildDuplicateCodeToolCommand(File duplicateCodeToolBatFile) {
+		List<String> duplicateCodeToolCmdList = new ArrayList<String>();
+		try {
+			duplicateCodeToolCmdList.add("cmd");
+			duplicateCodeToolCmdList.add("/c");
+			duplicateCodeToolCmdList.add(duplicateCodeToolBatFile.getAbsolutePath());
+			duplicateCodeToolCmdList.add("--minimum-tokens");
+			duplicateCodeToolCmdList.add("100");
+			duplicateCodeToolCmdList.add("--files");
+			duplicateCodeToolCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
+			duplicateCodeToolCmdList.add("--format");
+			duplicateCodeToolCmdList.add("xml");
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
+		
+		return duplicateCodeToolCmdList;
+	}
+	
+	/**
 	 * Extracts Duplicate Code smells and returns a list that contains all of them.
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
 	 * @return a list which contains all the duplicate code smells
@@ -133,11 +159,11 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 
 	/**
-	 * Extracts God Class, Long Method and Long Parameter List code smells and returns a list
+	 * Extracts God Class, Long Method and Long Parameter List code smells and returns a set
 	 * that contains all of them.
 	 * 
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
-	 * @return a list which contains all the detected smells of the given smell type
+	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
 	private Set<Smell> extractSmells(Document xmlDoc) throws Exception {
@@ -161,10 +187,10 @@ public class PMDSmellDetector extends SmellDetector {
 				String detectedSmell = violationNode.getAttributes().getNamedItem("rule").getNodeValue();
 					
 				String className = violationNode.getAttributes().getNamedItem("class").getNodeValue();
-				if(MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell) == SmellType.GOD_CLASS) {
+				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
+				if(smellType == SmellType.GOD_CLASS) {
 					detectedSmells.add(Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
-					SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
 					String methodName = violationNode.getAttributes().getNamedItem("method").getNodeValue();
 					detectedSmells.add(Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
 				}
@@ -175,16 +201,17 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	/**
-	 * Builds a list that includes (in parts) the needed command to trigger the main tool via
+	 * Builds a list that includes (in parts) the needed command to execute the main tool via
 	 * the command line and produce the smell detection results.
 	 * 
 	 * @param mainToolBatFile the file of the main tool
 	 * @param configFile the configuration file of the main tool
-	 * @param javaProject the selected java project for smell detection
+	 * @param cacheFile the file which contains cache details for the tool
 	 * @return a list with the needed command
 	 */
 	private List<String> buildMainToolCommand(File mainToolBatFile, File configFile, File cacheFile) {
 		List<String> mainToolCmdList = new ArrayList<String>();
+		
 		try {
 			mainToolCmdList.add("cmd");
 			mainToolCmdList.add("/c");
@@ -204,29 +231,4 @@ public class PMDSmellDetector extends SmellDetector {
 		return mainToolCmdList;
 	}
 	
-	/**
-	 * Builds a list that includes (in parts) the needed command to trigger the duplicate
-	 * code tool via the command line and produce the detection results.
-	 * 
-	 * @param duplicateCodeToolBatFile the file of the duplicate code tool
-	 * @return a list with the needed command
-	 */
-	private List<String> buildDuplicateCodeToolCommand(File duplicateCodeToolBatFile) {
-		List<String> duplicateCodeToolCmdList = new ArrayList<String>();
-		try {
-			duplicateCodeToolCmdList.add("cmd");
-			duplicateCodeToolCmdList.add("/c");
-			duplicateCodeToolCmdList.add(duplicateCodeToolBatFile.getAbsolutePath());
-			duplicateCodeToolCmdList.add("--minimum-tokens");
-			duplicateCodeToolCmdList.add("100");
-			duplicateCodeToolCmdList.add("--files");
-			duplicateCodeToolCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
-			duplicateCodeToolCmdList.add("--format");
-			duplicateCodeToolCmdList.add("xml");
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		
-		return duplicateCodeToolCmdList;
-	}
 }

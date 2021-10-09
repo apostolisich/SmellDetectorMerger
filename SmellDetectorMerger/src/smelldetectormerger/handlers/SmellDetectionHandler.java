@@ -20,7 +20,9 @@ import org.osgi.framework.Bundle;
 import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
 import smelldetectormerger.Activator;
+import smelldetectormerger.detectors.CheckStyleSmellDetector;
 import smelldetectormerger.detectors.PMDSmellDetector;
+import smelldetectormerger.detectors.SmellDetector;
 import smelldetectormerger.views.SmellsView;
 
 public class SmellDetectionHandler extends AbstractHandler {
@@ -35,14 +37,11 @@ public class SmellDetectionHandler extends AbstractHandler {
 		Bundle bundle = Activator.getDefault().getBundle();
 		
 		PMDSmellDetector pmdDetector = new PMDSmellDetector(bundle, javaProject);
-		Set<Smell> detectedSmells = null;
-		try {
-			detectedSmells = pmdDetector.findSmells(SmellType.DUPLICATE_CODE);
-		} catch(Exception e) {
-			//Ignore if an error is thrown. The flow should continue with the rest of the tools.
-		}
+		CheckStyleSmellDetector checkStyleSmellDetector = new CheckStyleSmellDetector(bundle, javaProject);
 		
-//		CheckStyleSmellDetector.findSmells(bundle, javaProject);
+		Set<Smell> detectedSmells = detectSmellsFromDetector(pmdDetector);
+		detectedSmells.addAll(detectSmellsFromDetector(checkStyleSmellDetector));
+		
 //		JSpIRITSmellDetector.findSmells(selectedProject);
 //		JDeodorantSmellDetector.findSmells(bundle, javaProject);
 //		DuDeSmellDetector.findSmells(bundle, javaProject);
@@ -83,5 +82,22 @@ public class SmellDetectionHandler extends AbstractHandler {
 		}
 		
 		return selectedProject;
+	}
+	
+	/**
+	 * Finds code smells using the given detector and returns the results.
+	 * 
+	 * @param smellDetector the detector to check the selected project for smells
+	 * @return a {@code Set} of the detected smells from the tool
+	 */
+	private Set<Smell> detectSmellsFromDetector(SmellDetector smellDetector) {
+		try {
+			return smellDetector.findSmells(SmellType.DUPLICATE_CODE);
+		} catch(Exception e) {
+			e.printStackTrace();
+			//Ignore if an error is thrown. The flow should continue with the rest of the tools.
+		}
+		
+		return null;
 	}
 }

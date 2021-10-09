@@ -4,6 +4,10 @@
           "https://checkstyle.org/dtds/configuration_1_3.dtd">
 
 <module name="Checker">
+
+	<!-- Set to only check for java files in a project -->
+	<property name="fileExtensions" value="java"/>
+	
 	<!-- The check for large classes -->
 	<!-- https://checkstyle.sourceforge.io/apidocs/com/puppycrawl/tools/checkstyle/checks/sizes/FileLengthCheck.html -->
 	<module name="FileLength"/>
