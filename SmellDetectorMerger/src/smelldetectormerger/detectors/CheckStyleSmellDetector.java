@@ -58,6 +58,9 @@ public class CheckStyleSmellDetector {
 		ProcessBuilder pb = new ProcessBuilder(checkStyleCmdList);
 		pb.redirectErrorStream(true);
 
+//		String extractedLine = Files.readAllLines(Paths.get(FILE_PATH)).get(4);
+		//Use this to get the method in a given line since checkstyle doesn't give method name for Long Parameter List smell
+		
 //		MessageConsole console = new MessageConsole("My Console", null);
 //		console.activate();
 //		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{ console });

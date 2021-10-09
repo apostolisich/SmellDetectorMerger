@@ -1,14 +1,26 @@
 package smelldetector.smells;
 
-public class GodClass implements Smellable {
+import org.eclipse.core.resources.IFile;
+
+public class GodClass extends Smell {
 
 	private String className;
 	
-	public GodClass(String className) {
+	public GodClass(String className,  IFile targetIFile, int targetStartLine) {
 		this.className = className;
+		this.targetIFile = targetIFile;
+		this.targetStartLine = targetStartLine;
+		this.targetEndLine = 0;
 	}
 	
-	public String getClassName() {
+	@Override
+	public String getAffectedElementName() {
 		return className;
 	}
+
+	@Override
+	public String getSmellTypeName() {
+		return SmellType.GOD_CLASS.getName();
+	}
+
 }

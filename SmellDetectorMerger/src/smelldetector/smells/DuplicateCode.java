@@ -1,19 +1,32 @@
 package smelldetector.smells;
 
-import java.util.List;
+import org.eclipse.core.resources.IFile;
 
-import smelldetectormerger.utilities.Duplication;
-
-public class DuplicateCode implements Smellable {
-
-	private List<Duplication> duplications;
+/**
+ * A class that represents code duplications detected by the tools.
+ */
+public class DuplicateCode extends Smell {
 	
-	public DuplicateCode(List<Duplication> duplications) {
-		this.duplications = duplications;
+	/** Each duplication belongs to a group of duplicates (same code in different places). This is recognised by the group id */
+	private int duplicationGroupId;
+	private String className;
+	
+	public DuplicateCode(int duplicationGroupId, String className, IFile targetIFile, int targetStartLine, int targetEndLine) {
+		this.duplicationGroupId = duplicationGroupId;
+		this.className = className;
+		this.targetIFile = targetIFile;
+		this.targetStartLine = targetStartLine;
+		this.targetEndLine = targetEndLine;
+	}
+	
+	@Override
+	public String getAffectedElementName() {
+		return String.format("Group %d, %s - Start: %s - End: %s", duplicationGroupId, className, targetStartLine, targetEndLine);
 	}
 
-	public List<Duplication> getDuplications() {
-		return duplications;
+	@Override
+	public String getSmellTypeName() {
+		return SmellType.DUPLICATE_CODE.getName();
 	}
-	
+
 }

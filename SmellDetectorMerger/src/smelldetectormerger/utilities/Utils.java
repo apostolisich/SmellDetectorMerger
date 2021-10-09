@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.URIUtil;
@@ -20,10 +21,11 @@ import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import smelldetector.smells.DuplicateCode;
 import smelldetector.smells.GodClass;
 import smelldetector.smells.LongMethod;
 import smelldetector.smells.LongParameterList;
-import smelldetector.smells.Smellable;
+import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
 
 public abstract class Utils {
@@ -133,19 +135,31 @@ public abstract class Utils {
 		return db;
 	}
 	
-	public static Smellable createSmellObject(SmellType smellType, String... args) throws Exception {
-		Smellable codeSmell = null;
+	/**
+	 * Creates and returns a new smell object based on the given arguments.
+	 * 
+	 * @param smellType the type of the smell to be created
+	 * @param args the arguments for the smell constructor
+	 * @return a new smell object
+	 * @throws Exception
+	 */
+	public static Smell createSmellObject(SmellType smellType, Object... args) throws Exception {
+		Smell codeSmell = null;
 		switch(smellType) {
 			case GOD_CLASS:
-				codeSmell = new GodClass(args[0]);
+				codeSmell = new GodClass((String) args[0], (IFile) args[1], (Integer) args[2]);
 				break;
 			case LONG_METHOD:
-				codeSmell = new LongMethod(args[0], args[1]);
+				codeSmell = new LongMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
 				break;
 			case LONG_PARAMETER_LIST:
-				codeSmell = new LongParameterList(args[0], args[1]);
+				codeSmell = new LongParameterList((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
+			case DUPLICATE_CODE:
+				codeSmell = new DuplicateCode((Integer) args[0], (String) args[1], (IFile) args[2], (Integer) args[3], (Integer) args[4]);
+				break;
 			default:
-				throw new Exception("Unexpected smell type");
+				throw new Exception("Unexpected smell type: " + smellType.getName());
 		}
 		return codeSmell;
 	}

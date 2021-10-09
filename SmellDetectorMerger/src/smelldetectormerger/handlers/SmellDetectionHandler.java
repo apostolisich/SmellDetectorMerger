@@ -17,8 +17,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.osgi.framework.Bundle;
 
+import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
-import smelldetector.smells.Smellable;
 import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.PMDSmellDetector;
 import smelldetectormerger.views.SmellsView;
@@ -35,7 +35,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		Bundle bundle = Activator.getDefault().getBundle();
 		
 		PMDSmellDetector pmdDetector = new PMDSmellDetector(bundle, javaProject);
-		Set<Smellable> detectedSmells = null;
+		Set<Smell> detectedSmells = null;
 		try {
 			detectedSmells = pmdDetector.findSmells(SmellType.DUPLICATE_CODE);
 		} catch(Exception e) {
@@ -48,7 +48,9 @@ public class SmellDetectionHandler extends AbstractHandler {
 //		DuDeSmellDetector.findSmells(bundle, javaProject);
 		
 		try {
-			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("smelldetectormerger.views.SmellsView");
+			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+					getActivePage().showView("smelldetectormerger.views.SmellsView");
+			smellsView.addDetectedSmells(detectedSmells);
 		} catch (PartInitException e1) {
 			e1.printStackTrace();
 		}
