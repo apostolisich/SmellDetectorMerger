@@ -50,14 +50,14 @@ public class CheckStyleSmellDetector extends SmellDetector {
 	}
 
 	@Override
-	public Set<Smell> findSmells(SmellType smellType) throws Exception {
+	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		File checkStyleJarFile = Utils.createFile(bundle, "checkstyle-8.45/checkstyle-8.45-all.jar");
 		File checkStyleConfigFile = Utils.createFile(bundle, "checkstyle-8.45/checkstyle-config.xml");
 		
-		String toolOutput = Utils.runCommand(buildToolCommand(checkStyleJarFile, checkStyleConfigFile));
+		String toolOutput = Utils.runCommand(buildToolCommand(checkStyleJarFile, checkStyleConfigFile), true);
 		Document xmlDoc = Utils.getXmlDocument(toolOutput);
 		
-		return extractSmells(xmlDoc);
+		extractSmells(xmlDoc, detectedSmells);
 	}
 	
 	/**
@@ -107,12 +107,11 @@ public class CheckStyleSmellDetector extends SmellDetector {
 	 * that contains all of them.
 	 * 
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
-	private Set<Smell> extractSmells(Document xmlDoc) throws Exception {
-		Set<Smell> detectedSmells = new HashSet<Smell>();
-		
+	private void extractSmells(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int i = 0; i < fileNodes.getLength(); i++) {
 			Node fileNode = fileNodes.item(i);
@@ -134,9 +133,10 @@ public class CheckStyleSmellDetector extends SmellDetector {
 				int startLine = Integer.parseInt(errorNode.getAttributes().getNamedItem("line").getNodeValue());
 				
 				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
+				
 				if(smellType == SmellType.GOD_CLASS) {
 					//CheckStyle returns line 1 in case a GodClass is found, instead of the line in which the class is declared
-					detectedSmells.add(Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = "";
 					if(smellType == SmellType.LONG_PARAMETER_LIST) {
@@ -146,12 +146,10 @@ public class CheckStyleSmellDetector extends SmellDetector {
 						methodName = message.substring(0, message.indexOf(" "));
 					}
 					
-					detectedSmells.add(Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}
-		
-		return detectedSmells;
 	}
 	
 	/**

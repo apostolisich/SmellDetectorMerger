@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +50,7 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	@Override
-	public Set<Smell> findSmells(SmellType smellType) throws Exception {
+	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
 		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
 		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
@@ -69,19 +68,15 @@ public class PMDSmellDetector extends SmellDetector {
 //			return extractSmells(xmlDoc, smellType);
 //		}
 		
-		String commandOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile));
-		Document xmlDoc = Utils.getXmlDocument(commandOutput);
+		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), true);
+		Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
 		
-		Set<Smell> detectedDuplicates = extractDuplicates(xmlDoc);
+		extractDuplicates(cpdXmlDoc, detectedSmells);
 		
-		String commandOutput2 = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile));
-		Document xmlDoc2 = Utils.getXmlDocument(commandOutput2);
+		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), true);
+		Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
 			
-		Set<Smell> detectedSmells = extractSmells(xmlDoc2);
-		
-		detectedSmells.addAll(detectedDuplicates);
-		
-		return detectedSmells;
+		extractSmells(pmdXmlDoc, detectedSmells);
 	}
 	
 	/**
@@ -111,13 +106,14 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	/**
-	 * Extracts Duplicate Code smells and returns a list that contains all of them.
+	 * Extracts Duplicate Code smells and returns a set that contains all of them.
+	 * 
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
-	 * @return a list which contains all the duplicate code smells
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 * @throws Exception 
 	 */
-	private Set<Smell> extractDuplicates(Document xmlDoc) throws Exception {
-		Set<Smell> detectedDuplicates = new LinkedHashSet<Smell>();
+	private void extractDuplicates(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		int duplicatesCounter = detectedSmells.containsKey(SmellType.DUPLICATE_CODE) ? detectedSmells.get(SmellType.DUPLICATE_CODE).size() : 0;
 		
 		NodeList duplicationNodes = xmlDoc.getDocumentElement().getElementsByTagName("duplication");
 		for(int i = 0; i < duplicationNodes.getLength(); i++) {
@@ -138,11 +134,12 @@ public class PMDSmellDetector extends SmellDetector {
 				String filePath = path.substring(path.indexOf("\\", path.indexOf(javaProject.getPath().makeRelative().toString())));
 				IFile targetFile = javaProject.getProject().getFile(filePath);
 				
-				detectedDuplicates.add(Utils.createSmellObject(SmellType.DUPLICATE_CODE, i, className, targetFile, startLine, endLine));
+				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, 
+						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicatesCounter, className, targetFile, startLine, endLine));
 			}
+			
+			duplicatesCounter++;
 		}
-		
-		return detectedDuplicates;
 	}
 	
 	/**
@@ -163,12 +160,11 @@ public class PMDSmellDetector extends SmellDetector {
 	 * that contains all of them.
 	 * 
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
-	private Set<Smell> extractSmells(Document xmlDoc) throws Exception {
-		Set<Smell> detectedSmells = new LinkedHashSet<Smell>();
-
+	private void extractSmells(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int fileIndex = 0; fileIndex < fileNodes.getLength(); fileIndex++) {
 			Node fileNode = fileNodes.item(fileIndex);
@@ -188,16 +184,15 @@ public class PMDSmellDetector extends SmellDetector {
 					
 				String className = violationNode.getAttributes().getNamedItem("class").getNodeValue();
 				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
+				
 				if(smellType == SmellType.GOD_CLASS) {
-					detectedSmells.add(Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = violationNode.getAttributes().getNamedItem("method").getNodeValue();
-					detectedSmells.add(Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}
-		
-		return detectedSmells;
 	}
 	
 	/**

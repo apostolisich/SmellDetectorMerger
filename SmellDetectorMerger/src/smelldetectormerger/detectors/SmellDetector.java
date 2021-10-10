@@ -1,5 +1,6 @@
 package smelldetectormerger.detectors;
 
+import java.util.Map;
 import java.util.Set;
 
 import smelldetector.smells.Smell;
@@ -28,8 +29,8 @@ public abstract class SmellDetector {
 	 * given smell type.
 	 * 
 	 * @param smellType the smell type to check for
-	 * @return a {@code Set} of detected smells
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 */
-	public abstract Set<Smell> findSmells(SmellType smellType) throws Exception;
+	public abstract void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception;
 
 }

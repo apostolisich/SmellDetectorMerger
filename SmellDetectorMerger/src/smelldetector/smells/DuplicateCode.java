@@ -1,5 +1,7 @@
 package smelldetector.smells;
 
+import java.util.Objects;
+
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -29,4 +31,24 @@ public class DuplicateCode extends Smell {
 		return SmellType.DUPLICATE_CODE.getName();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(className);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DuplicateCode other = (DuplicateCode) obj;
+		return Objects.equals(className, other.className);
+	}
+	
 }

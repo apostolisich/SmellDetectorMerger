@@ -1,81 +1,148 @@
 package smelldetectormerger.detectors;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-public class DuDeSmellDetector {
+import smelldetector.smells.Smell;
+import smelldetector.smells.SmellType;
+import smelldetectormerger.utilities.Utils;
+
+public class DuDeSmellDetector extends SmellDetector {
 	
-	public static void findSmells(Bundle bundle, IJavaProject javaProject) {
-		URL jarUrl = FileLocator.find(bundle, new Path("dude/dude.jar"), null);
-		URL configUrl = FileLocator.find(bundle, new Path("dude/selected-project.txt"), null);
-		File jarFile = null;
-		File configFile = null;
-		try {
-			jarUrl = FileLocator.toFileURL(jarUrl);
-			jarFile = URIUtil.toFile(URIUtil.toURI(jarUrl));
-
-			configUrl = FileLocator.toFileURL(configUrl);
-			configFile = URIUtil.toFile(URIUtil.toURI(configUrl));
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		try(FileWriter selectedProjectFileWriter = new FileWriter(configFile)) {
-			selectedProjectFileWriter.write(javaProject.getCorrespondingResource().getLocation().toString());
-			//TODO this should go in a finally block
-			selectedProjectFileWriter.close();
-		} catch (IOException | JavaModelException e1) {
-			e1.printStackTrace();
-		}
-		
-		List<String> checkStyleCmdList = new ArrayList<>();
-		checkStyleCmdList.add("cmd");
-		checkStyleCmdList.add("/c");
-		checkStyleCmdList.add("java");
-		checkStyleCmdList.add("-cp");
-		checkStyleCmdList.add(jarFile.getAbsolutePath());
-		checkStyleCmdList.add("lrg.dude.batch.RunBatchMode");
-		checkStyleCmdList.add(configFile.getAbsolutePath());
-
-		ProcessBuilder pb = new ProcessBuilder(checkStyleCmdList);
-		pb.redirectErrorStream(true);
-
-//		MessageConsole console = new MessageConsole("My Console", null);
-//		console.activate();
-//		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{ console });
-//		MessageConsoleStream stream = console.newMessageStream();
-
-		try {
-			Process p = pb.start();
-
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				System.out.println(line);
-//				stream.println(line);
-			}
-			reader.close();
-			
-			//TODO For the results, I should parse the generated files in System.getProperty("user.dir")
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private Bundle bundle;
+	private IJavaProject javaProject;
+	
+	public DuDeSmellDetector(Bundle bundle, IJavaProject javaProject) {
+		this.bundle = bundle;
+		this.javaProject = javaProject;
+	}
+	
+	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
+			new HashSet<SmellType>(Arrays.asList(SmellType.DUPLICATE_CODE)));
+	
+	@Override
+	public Set<SmellType> getSupportedSmellTypes() {
+		return SUPPORTED_SMELL_TYPES;
 	}
 
+	@Override
+	public String getDetectorName() {
+		return "DuDe";
+	}
+
+	@Override
+	public void findSmells(SmellType smellType,  Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		File dudeJarFile = Utils.createFile(bundle, "dude/dude.jar");
+		File dudeConfigFile = Utils.createFile(bundle, "dude/selected-project.txt");
+		
+		writeSelectedProjectPathToConfigFile(dudeConfigFile);
+		
+		Utils.runCommand(buildToolCommand(dudeJarFile, dudeConfigFile), false);
+		
+		for(int i = 0; i < 3; i++) {
+			File resultsFile = Utils.createFile(bundle, String.format("dude/Result%d.xml", i));
+			if(resultsFile == null)
+				continue;
+			
+			Document xmlDoc = Utils.getXmlDocument(resultsFile);
+			extractDuplicates(xmlDoc, detectedSmells);
+			resultsFile.delete();
+		}
+	}
+	
+	/**
+	 * Writes the project's absolute path to the config file of the tool.
+	 * 
+	 * @param dudeConfigFile the configuration file of the tool
+	 * @throws Exception 
+	 */
+	private void writeSelectedProjectPathToConfigFile(File dudeConfigFile) throws Exception {
+		try(FileWriter selectedProjectFileWriter = new FileWriter(dudeConfigFile)) {
+			//This is needed so that the tool knows where the project is located in order to be checked
+			selectedProjectFileWriter.write(javaProject.getCorrespondingResource().getLocation().toString());
+		} catch (IOException | JavaModelException e) {
+			throw e;
+		}
+	}
+	
+	/**
+	 * Builds a list that includes (in parts) the needed command to execute the tool via
+	 * the command line and produce the smell detection results.
+	 * 
+	 * @param dudeJarFile the file of the tool
+	 * @param dudeConfigFile the configuration file of the tool
+	 * @return a list with the needed command
+	 * @throws JavaModelException 
+	 */
+	private List<String> buildToolCommand(File dudeJarFile, File dudeConfigFile) throws JavaModelException {
+		List<String> dudeCmdList = new ArrayList<>();
+		
+		String dudeDirectory = dudeJarFile.getAbsolutePath().toString();
+		dudeDirectory = dudeDirectory.substring(0, dudeDirectory.lastIndexOf("\\") + 1);
+		
+		dudeCmdList.add("cmd");
+		dudeCmdList.add("/c");
+		dudeCmdList.add("cd");
+		dudeCmdList.add(dudeDirectory);
+		dudeCmdList.add("&&");
+		dudeCmdList.add("java");
+		dudeCmdList.add("-cp");
+		dudeCmdList.add(dudeJarFile.getAbsolutePath());
+		dudeCmdList.add("lrg.dude.batch.RunBatchMode");
+		dudeCmdList.add(dudeConfigFile.getAbsolutePath());
+		
+		return dudeCmdList;
+	}
+
+	/**
+	 * Extracts Duplicate Code smells and returns a set that contains all of them.
+	 * 
+	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
+	 * @throws Exception 
+	 */
+	private void extractDuplicates(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		int duplicatesCounter = detectedSmells.containsKey(SmellType.DUPLICATE_CODE) ? detectedSmells.get(SmellType.DUPLICATE_CODE).size() : 1;
+		
+		NodeList dupChains = xmlDoc.getDocumentElement().getElementsByTagName("DupChain");
+		for(int i = 0; i < dupChains.getLength(); i++) {
+			NodeList codeSnippets = dupChains.item(i).getChildNodes();
+			for(int j = 0; j < codeSnippets.getLength(); j++) {
+				Node codeSnippet = codeSnippets.item(j);
+				
+				if(!codeSnippet.getNodeName().equals("CodeSnippet"))
+					continue;
+				
+				String fileName = codeSnippet.getAttributes().getNamedItem("FileName").getNodeValue();
+				if(!fileName.endsWith(".java"))
+					continue;
+				
+				String className = fileName.substring(fileName.lastIndexOf("\\") + 1);
+				IFile targetIFile = javaProject.getProject().getFile(fileName);
+				int startLine = Integer.parseInt(codeSnippet.getAttributes().getNamedItem("From").getNodeValue());
+				int endLine = Integer.parseInt(codeSnippet.getAttributes().getNamedItem("To").getNodeValue());
+				
+				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, 
+						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicatesCounter, className, targetIFile, startLine, endLine));
+			}
+			
+			duplicatesCounter++;
+		}
+	}
 }

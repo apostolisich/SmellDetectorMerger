@@ -1,5 +1,7 @@
 package smelldetectormerger.views;
 
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -22,8 +24,10 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+
 import smelldetector.smells.DuplicateCode;
 import smelldetector.smells.Smell;
+import smelldetector.smells.SmellType;
 
 public class SmellsView extends ViewPart {
 
@@ -97,8 +101,12 @@ public class SmellsView extends ViewPart {
 	 * 
 	 * @param detectedSmells the smells detected by the different tools
 	 */
-	public void addDetectedSmells(Set<Smell> detectedSmells) {
-		tableViewer.setInput(detectedSmells);
+	public void addDetectedSmells(Map<SmellType, Set<Smell>> detectedSmells) {
+		Set<Smell> fullSetOfSmells = new LinkedHashSet<Smell>();
+		detectedSmells.forEach( (k,v) -> {
+			fullSetOfSmells.addAll(v);
+		});
+		tableViewer.setInput(fullSetOfSmells);
 	}
 	
 	/**

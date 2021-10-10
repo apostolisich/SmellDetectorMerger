@@ -1,5 +1,7 @@
 package smelldetectormerger.handlers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -21,6 +23,7 @@ import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
 import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.CheckStyleSmellDetector;
+import smelldetectormerger.detectors.DuDeSmellDetector;
 import smelldetectormerger.detectors.PMDSmellDetector;
 import smelldetectormerger.detectors.SmellDetector;
 import smelldetectormerger.views.SmellsView;
@@ -36,16 +39,19 @@ public class SmellDetectionHandler extends AbstractHandler {
 		IJavaProject javaProject = JavaCore.create(selectedProject);
 		Bundle bundle = Activator.getDefault().getBundle();
 		
-		PMDSmellDetector pmdDetector = new PMDSmellDetector(bundle, javaProject);
+		PMDSmellDetector pmdSmellDetector = new PMDSmellDetector(bundle, javaProject);
 		CheckStyleSmellDetector checkStyleSmellDetector = new CheckStyleSmellDetector(bundle, javaProject);
+		DuDeSmellDetector dudeSmellDetector = new DuDeSmellDetector(bundle, javaProject);
 		
-		Set<Smell> detectedSmells = detectSmellsFromDetector(pmdDetector);
-		detectedSmells.addAll(detectSmellsFromDetector(checkStyleSmellDetector));
+		Map<SmellType, Set<Smell>> detectedSmells = new HashMap<>();
+				
+		detectSmellsForDetector(pmdSmellDetector, detectedSmells);
+		detectSmellsForDetector(checkStyleSmellDetector, detectedSmells);
+		detectSmellsForDetector(dudeSmellDetector, detectedSmells);
 		
 //		JSpIRITSmellDetector.findSmells(selectedProject);
 //		JDeodorantSmellDetector.findSmells(bundle, javaProject);
-//		DuDeSmellDetector.findSmells(bundle, javaProject);
-		
+
 		try {
 			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 					getActivePage().showView("smelldetectormerger.views.SmellsView");
@@ -88,16 +94,14 @@ public class SmellDetectionHandler extends AbstractHandler {
 	 * Finds code smells using the given detector and returns the results.
 	 * 
 	 * @param smellDetector the detector to check the selected project for smells
-	 * @return a {@code Set} of the detected smells from the tool
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 */
-	private Set<Smell> detectSmellsFromDetector(SmellDetector smellDetector) {
+	private void detectSmellsForDetector(SmellDetector smellDetector, Map<SmellType, Set<Smell>> detectedSmells) {
 		try {
-			return smellDetector.findSmells(SmellType.DUPLICATE_CODE);
+			smellDetector.findSmells(null, detectedSmells);
 		} catch(Exception e) {
 			e.printStackTrace();
 			//Ignore if an error is thrown. The flow should continue with the rest of the tools.
 		}
-		
-		return null;
 	}
 }

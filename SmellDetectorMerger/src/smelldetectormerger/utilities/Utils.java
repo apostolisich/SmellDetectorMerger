@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,13 +44,14 @@ public abstract class Utils {
 		URL fileUrl = FileLocator.find(bundle, new Path(filePath), null);
 		
 		File createdFile = null;
+		if(fileUrl == null)
+			return null;
+		
 		try {
 			fileUrl = FileLocator.toFileURL(fileUrl);
 			createdFile = URIUtil.toFile(URIUtil.toURI(fileUrl));
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (URISyntaxException | IOException e1) {
+			//Ignore. The created file will be null and checks will be made in the tool's class
 		}
 		
 		return createdFile;
@@ -57,9 +61,10 @@ public abstract class Utils {
 	 * Runs the given command from the command list and returns the output as a {@code String}
 	 * 
 	 * @param commandList a list that contains the parts of the command to be processed
+	 * @param returnOutput a flag that indicates whether output should be returned or not
 	 * @return the output of the command after it's run
 	 */
-	public static String runCommand(List<String> commandList) {
+	public static String runCommand(List<String> commandList, boolean returnOutput) {
 		ProcessBuilder pb = new ProcessBuilder(commandList);
 		pb.redirectErrorStream(true);
 		
@@ -67,6 +72,10 @@ public abstract class Utils {
 		BufferedReader reader;
 		try {
 			Process p = pb.start();
+			
+			if(!returnOutput)
+				return null;
+				
 			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 					
 			String line;
@@ -166,6 +175,21 @@ public abstract class Utils {
 				throw new Exception("Unexpected smell type: " + smellType.getName());
 		}
 		return codeSmell;
+	}
+	
+	/**
+	 * Adds the given new smell to the detected smells map.
+	 * 
+	 * @param smellType the {@code SmellType} of the new smell
+	 * @param detectedSmells a {@code Map} that contains the detected smells
+	 * @param newSmell the new {@code Smell} to be added
+	 */
+	public static void addSmell(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells, Smell newSmell) {
+		if(!detectedSmells.containsKey(smellType)) {
+			detectedSmells.put(smellType, new LinkedHashSet<Smell>());
+		}
+		
+		detectedSmells.get(smellType).add(newSmell);
 	}
 	
 }

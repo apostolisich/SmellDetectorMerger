@@ -1,5 +1,7 @@
 package smelldetector.smells;
 
+import java.util.Objects;
+
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -25,6 +27,23 @@ public abstract class Smell {
 	
 	public int getTargetEndLine() {
 		return targetEndLine;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(targetEndLine, targetIFile, targetStartLine);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Smell other = (Smell) obj;
+		return targetEndLine == other.targetEndLine && targetStartLine == other.targetStartLine;
 	};
 	
 }
