@@ -2,7 +2,6 @@ package smelldetectormerger.detectors;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -136,6 +135,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 				
 				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
 				if(smellType == SmellType.GOD_CLASS) {
+					//CheckStyle returns line 1 in case a GodClass is found, instead of the line in which the class is declared
 					detectedSmells.add(Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = "";
