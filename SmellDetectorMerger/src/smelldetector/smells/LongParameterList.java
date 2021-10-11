@@ -19,7 +19,7 @@ public class LongParameterList extends Smell {
 	
 	@Override
 	public String getAffectedElementName() {
-		return String.format("%s.%s", className, methodName);
+		return String.format("%s.%s()", className, methodName);
 	}
 
 	@Override

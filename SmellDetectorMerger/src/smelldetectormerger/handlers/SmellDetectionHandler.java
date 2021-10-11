@@ -44,7 +44,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		DuDeSmellDetector dudeSmellDetector = new DuDeSmellDetector(bundle, javaProject);
 		
 		Map<SmellType, Set<Smell>> detectedSmells = new HashMap<>();
-				
+		
 		detectSmellsForDetector(pmdSmellDetector, detectedSmells);
 		detectSmellsForDetector(checkStyleSmellDetector, detectedSmells);
 		detectSmellsForDetector(dudeSmellDetector, detectedSmells);
