@@ -24,6 +24,7 @@ import smelldetector.smells.SmellType;
 import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.CheckStyleSmellDetector;
 import smelldetectormerger.detectors.DuDeSmellDetector;
+import smelldetectormerger.detectors.JSpIRITSmellDetector;
 import smelldetectormerger.detectors.PMDSmellDetector;
 import smelldetectormerger.detectors.SmellDetector;
 import smelldetectormerger.views.SmellsView;
@@ -42,14 +43,15 @@ public class SmellDetectionHandler extends AbstractHandler {
 		PMDSmellDetector pmdSmellDetector = new PMDSmellDetector(bundle, javaProject);
 		CheckStyleSmellDetector checkStyleSmellDetector = new CheckStyleSmellDetector(bundle, javaProject);
 		DuDeSmellDetector dudeSmellDetector = new DuDeSmellDetector(bundle, javaProject);
+		JSpIRITSmellDetector jSpiritSmellDetector = new JSpIRITSmellDetector(selectedProject, javaProject);
 		
 		Map<SmellType, Set<Smell>> detectedSmells = new HashMap<>();
 		
-		detectSmellsForDetector(pmdSmellDetector, detectedSmells);
-		detectSmellsForDetector(checkStyleSmellDetector, detectedSmells);
-		detectSmellsForDetector(dudeSmellDetector, detectedSmells);
+		detectCodeSmells(pmdSmellDetector, detectedSmells);
+		detectCodeSmells(checkStyleSmellDetector, detectedSmells);
+		detectCodeSmells(dudeSmellDetector, detectedSmells);
+		detectCodeSmells(jSpiritSmellDetector, detectedSmells);
 		
-//		JSpIRITSmellDetector.findSmells(selectedProject);
 //		JDeodorantSmellDetector.findSmells(bundle, javaProject);
 
 		try {
@@ -96,7 +98,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 	 * @param smellDetector the detector to check the selected project for smells
 	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 */
-	private void detectSmellsForDetector(SmellDetector smellDetector, Map<SmellType, Set<Smell>> detectedSmells) {
+	private void detectCodeSmells(SmellDetector smellDetector, Map<SmellType, Set<Smell>> detectedSmells) {
 		try {
 			smellDetector.findSmells(null, detectedSmells);
 		} catch(Exception e) {

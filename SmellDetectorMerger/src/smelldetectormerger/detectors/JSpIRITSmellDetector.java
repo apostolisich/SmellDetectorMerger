@@ -1,10 +1,20 @@
 package smelldetectormerger.detectors;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 
+import smelldetector.smells.Smell;
+import smelldetector.smells.SmellType;
+import smelldetectormerger.utilities.Utils;
 import spirit.changes.manager.CodeChanges;
 import spirit.core.design.AgglomerationManager;
 import spirit.core.design.CodeSmellsManager;
@@ -14,9 +24,62 @@ import spirit.dependencies.DependencyVisitor;
 import spirit.dependencies.Graph;
 import spirit.metrics.storage.InvokingCache;
 
-public class JSpIRITSmellDetector {
+public class JSpIRITSmellDetector extends SmellDetector {
+	
+	private IProject selectedProject;
+	private IJavaProject javaProject;
+	
+	public JSpIRITSmellDetector(IProject selectedProject, IJavaProject javaProject) {
+		this.selectedProject = selectedProject;
+		this.javaProject = javaProject;
+	}
 
-	public static void findSmells(IProject selectedProject) {
+	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
+			new HashSet<SmellType>(Arrays.asList(SmellType.BRAIN_CLASS,
+												SmellType.BRAIN_METHOD,
+												SmellType.LONG_METHOD,
+												SmellType.DATA_CLASS,
+												SmellType.DISPERSE_COUPLING,
+												SmellType.FEATURE_ENVY,
+												SmellType.GOD_CLASS,
+												SmellType.INTENSIVE_COUPLING,
+												SmellType.REFUSED_PARENT_BEQUEST,
+												SmellType.SHOTGUN_SURGERY,
+												SmellType.TRADITION_BREAKER)));
+	
+	@Override
+	public Set<SmellType> getSupportedSmellTypes() {
+		return SUPPORTED_SMELL_TYPES;
+	}
+
+	@Override
+	public String getDetectorName() {
+		return "JSpIRIT";
+	}
+
+	/**
+	 * A map that contains the code smells detected from the tool as the key, and their
+	 * corresponding {@code SmellType} as the value.
+	 */
+	private static final Map<String, SmellType> MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE;
+	static {
+		Map<String, SmellType> tempMap = new HashMap<String, SmellType>(3);
+		tempMap.put("Brain Class", SmellType.BRAIN_CLASS);
+		tempMap.put("Brain Method", SmellType.BRAIN_METHOD);
+		tempMap.put("Long Method", SmellType.LONG_METHOD);
+		tempMap.put("Data Class", SmellType.DATA_CLASS);
+		tempMap.put("Dispersed Coupling", SmellType.DISPERSE_COUPLING);
+		tempMap.put("Feature Envy", SmellType.FEATURE_ENVY);
+		tempMap.put("God Class", SmellType.GOD_CLASS);
+		tempMap.put("Intensive Coupling", SmellType.INTENSIVE_COUPLING);
+		tempMap.put("Refused Parent Bequest", SmellType.REFUSED_PARENT_BEQUEST);
+		tempMap.put("Shotgun Surgery", SmellType.SHOTGUN_SURGERY);
+		tempMap.put("Tradition Breaker", SmellType.TRADITION_BREAKER);
+		MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE = Collections.unmodifiableMap(tempMap);
+	}
+	
+	@Override
+	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		CodeSmellsManagerFactory.getInstance().setCurrentProject(selectedProject);
 		CodeSmellsManager codeSmellManager = CodeSmellsManagerFactory.getInstance().getCurrentProjectManager();
 		codeSmellManager.initialize();
@@ -46,31 +109,23 @@ public class JSpIRITSmellDetector {
 			codeSmellManager.detectCodeSmells();
 
 			Vector<CodeSmell> codeSmells = codeSmellManager.getSmells();
-			int counter = 0;
-			for (CodeSmell smell : codeSmells) {
-				counter++;
-				System.out.println("----------------" + "Smell: " + counter + " -------------");
-				System.out.println("********* Affected Classes ************");
-				System.out.println(smell.getAffectedClasses());
-				System.out.println("********* Class ************");
-				System.out.println(smell.getClass());
-				System.out.println("********* Element ************");
-				System.out.println(smell.getElement());
-				System.out.println("********* Element name ************");
-				System.out.println(smell.getElementName());
-				System.out.println("********* Kind of smell name ************");
-				System.out.println(smell.getKindOfSmellName());
-				System.out.println("********* Line ************");
-				System.out.println(smell.getLine());
-				System.out.println("********* Main Class ************");
-				System.out.println(smell.getMainClass());
-				System.out.println("********* Main Class Name ************");
-				System.out.println(smell.getMainClassName());
+			for (CodeSmell smell: codeSmells) {
+				SmellType detectedSmellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(smell.getKindOfSmellName());
+				IFile targetIFile = javaProject.getProject().getFile(String.format("src\\%s.java", smell.getMainClassName().replace('.', '\\')));
+				
+				if(Utils.isClassSmell(detectedSmellType)) {
+					Utils.addSmell(detectedSmellType, detectedSmells, 
+							Utils.createSmellObject(detectedSmellType, smell.getElementName(), targetIFile, smell.getLine()));
+				} else {
+					String[] elementName = smell.getElementName().split("\\.");
+					Utils.addSmell(detectedSmellType, detectedSmells,
+							Utils.createSmellObject(detectedSmellType, elementName[0], elementName[1], targetIFile, smell.getLine()));
+				}
 			}
-
 		} catch (Exception e) {
-			e.printStackTrace();
+			//This could be ignored as well, since these exceptions are caught and ignored in the detection handler
+			throw e;
 		}
 	}
-
+	
 }

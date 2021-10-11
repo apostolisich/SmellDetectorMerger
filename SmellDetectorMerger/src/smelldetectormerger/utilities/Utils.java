@@ -24,12 +24,21 @@ import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import smelldetector.smells.BrainClass;
+import smelldetector.smells.BrainMethod;
+import smelldetector.smells.DataClass;
+import smelldetector.smells.DisperseCoupling;
 import smelldetector.smells.DuplicateCode;
+import smelldetector.smells.FeatureEnvy;
 import smelldetector.smells.GodClass;
+import smelldetector.smells.IntensiveCoupling;
 import smelldetector.smells.LongMethod;
 import smelldetector.smells.LongParameterList;
+import smelldetector.smells.RefusedParentBequest;
+import smelldetector.smells.ShotgunSurgery;
 import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
+import smelldetector.smells.TraditionBreaker;
 
 public abstract class Utils {
 	
@@ -175,6 +184,32 @@ public abstract class Utils {
 			case DUPLICATE_CODE:
 				codeSmell = new DuplicateCode((Integer) args[0], (String) args[1], (IFile) args[2], (Integer) args[3], (Integer) args[4]);
 				break;
+			case BRAIN_CLASS:
+				codeSmell = new BrainClass((String) args[0], (IFile) args[1], (Integer) args[2]);
+				break;
+			case BRAIN_METHOD:
+				codeSmell = new BrainMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
+			case DATA_CLASS:
+				codeSmell = new DataClass((String) args[0], (IFile) args[1], (Integer) args[2]);
+				break;
+			case DISPERSE_COUPLING:
+				codeSmell = new DisperseCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
+			case FEATURE_ENVY:
+				codeSmell = new FeatureEnvy((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+			case INTENSIVE_COUPLING:
+				codeSmell = new IntensiveCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
+			case REFUSED_PARENT_BEQUEST:
+				codeSmell = new RefusedParentBequest((String) args[0], (IFile) args[1], (Integer) args[2]);
+				break;
+			case SHOTGUN_SURGERY:
+				codeSmell = new ShotgunSurgery((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
+			case TRADITION_BREAKER:
+				codeSmell = new TraditionBreaker((String) args[0], (IFile) args[1], (Integer) args[2]);
+				break;
 			default:
 				throw new Exception("Unexpected smell type: " + smellType.getName());
 		}
@@ -194,6 +229,20 @@ public abstract class Utils {
 		}
 		
 		detectedSmells.get(smellType).add(newSmell);
+	}
+	
+	/**
+	 * A convenience method which checks if the given smell type is linked to smells related to classes.
+	 * 
+	 * @param smellType the smell type to be checked
+	 * @return true if the given smell is related to classes; false otherwise
+	 */
+	public static boolean isClassSmell(SmellType smellType) {
+		if(smellType == SmellType.GOD_CLASS || smellType == SmellType.BRAIN_CLASS || smellType == SmellType.DATA_CLASS ||
+				smellType == SmellType.REFUSED_PARENT_BEQUEST || smellType == SmellType.TRADITION_BREAKER)
+			return true;
+		
+		return false;
 	}
 	
 }
