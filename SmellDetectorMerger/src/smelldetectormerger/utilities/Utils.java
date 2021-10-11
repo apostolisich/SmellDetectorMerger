@@ -73,8 +73,10 @@ public abstract class Utils {
 		try {
 			Process p = pb.start();
 			
-			if(!returnOutput)
+			if(!returnOutput) {
+				p.destroy();
 				return null;
+			}
 				
 			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 					
@@ -87,6 +89,8 @@ public abstract class Utils {
 				output.append(line);
 				output.append("\n");
 			}
+			
+			p.destroy();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
