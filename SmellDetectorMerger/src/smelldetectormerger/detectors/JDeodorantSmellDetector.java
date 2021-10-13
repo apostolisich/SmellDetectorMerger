@@ -1,5 +1,8 @@
 package smelldetectormerger.detectors;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,9 +36,15 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		this.javaProject = javaProject;
 	}
 	
+	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
+			new HashSet<SmellType>(Arrays.asList(SmellType.GOD_CLASS,
+												SmellType.LONG_METHOD,
+												SmellType.FEATURE_ENVY,
+												SmellType.TYPE_CHECKING)));
+	
 	@Override
 	public Set<SmellType> getSupportedSmellTypes() {
-		return null;
+		return SUPPORTED_SMELL_TYPES;
 	}
 
 	@Override
