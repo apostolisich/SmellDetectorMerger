@@ -186,54 +186,6 @@ public abstract class Utils {
 		/** @formatter: on */
 		
 		return codeSmellBuilder.build();
-//		Smell codeSmell = null;
-//		switch(smellType) {
-//			case GOD_CLASS:
-//				codeSmell = new GodClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-//				break;
-//			case LONG_METHOD:
-//				codeSmell = new LongMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case LONG_PARAMETER_LIST:
-//				codeSmell = new LongParameterList((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case DUPLICATE_CODE:
-//				codeSmell = new DuplicateCode((Integer) args[0], (String) args[1], (IFile) args[2], (Integer) args[3], (Integer) args[4]);
-//				break;
-//			case BRAIN_CLASS:
-//				codeSmell = new BrainClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-//				break;
-//			case BRAIN_METHOD:
-//				codeSmell = new BrainMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case DATA_CLASS:
-//				codeSmell = new DataClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-//				break;
-//			case DISPERSE_COUPLING:
-//				codeSmell = new DisperseCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case FEATURE_ENVY:
-//				codeSmell = new FeatureEnvy((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case INTENSIVE_COUPLING:
-//				codeSmell = new IntensiveCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case REFUSED_PARENT_BEQUEST:
-//				codeSmell = new RefusedParentBequest((String) args[0], (IFile) args[1], (Integer) args[2]);
-//				break;
-//			case SHOTGUN_SURGERY:
-//				codeSmell = new ShotgunSurgery((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			case TRADITION_BREAKER:
-//				codeSmell = new TraditionBreaker((String) args[0], (IFile) args[1], (Integer) args[2]);
-//				break;
-//			case TYPE_CHECKING:
-//				codeSmell = new TypeChecking((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-//				break;
-//			default:
-//				throw new Exception("Unexpected smell type: " + smellType.getName());
-//		}
-//		return codeSmell;
 	}
 	
 	/**
