@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -39,6 +42,7 @@ import smelldetector.smells.ShotgunSurgery;
 import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
 import smelldetector.smells.TraditionBreaker;
+import smelldetector.smells.TypeChecking;
 
 public abstract class Utils {
 	
@@ -198,6 +202,7 @@ public abstract class Utils {
 				break;
 			case FEATURE_ENVY:
 				codeSmell = new FeatureEnvy((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+				break;
 			case INTENSIVE_COUPLING:
 				codeSmell = new IntensiveCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
 				break;
@@ -209,6 +214,9 @@ public abstract class Utils {
 				break;
 			case TRADITION_BREAKER:
 				codeSmell = new TraditionBreaker((String) args[0], (IFile) args[1], (Integer) args[2]);
+				break;
+			case TYPE_CHECKING:
+				codeSmell = new TypeChecking((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
 				break;
 			default:
 				throw new Exception("Unexpected smell type: " + smellType.getName());
@@ -245,4 +253,34 @@ public abstract class Utils {
 		return false;
 	}
 	
+	/**
+	 * Calculates the line number in which the given character offset is located
+	 * (credits to JSpIRIT).
+	 * 
+	 * @param cUnit the compilation unit of the java element to be checked
+	 * @param offSet the character offset to be checked
+	 * @return the line number of the offset
+	 */
+	public static int getLineNumFromOffset(ICompilationUnit cUnit, int offSet) {
+        try {
+            String source = cUnit.getSource();
+            IType type = cUnit.findPrimaryType();
+            if(type != null) {
+                String sourcetodeclaration = source.substring(0, offSet);
+                int lines = 0;
+                char[] chars = new char[sourcetodeclaration.length()];
+                sourcetodeclaration.getChars(0, sourcetodeclaration.length(), chars, 0);
+                for (int i = 0; i < chars.length; i++) {
+                    if (chars[i] == '\n') {
+                    	lines++;
+                    }
+                }
+                
+                return lines + 1;
+            }
+        } catch (JavaModelException jme) {
+        }
+        
+        return 0;      
+	}
 }

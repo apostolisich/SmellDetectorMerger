@@ -24,6 +24,7 @@ import smelldetector.smells.SmellType;
 import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.CheckStyleSmellDetector;
 import smelldetectormerger.detectors.DuDeSmellDetector;
+import smelldetectormerger.detectors.JDeodorantSmellDetector;
 import smelldetectormerger.detectors.JSpIRITSmellDetector;
 import smelldetectormerger.detectors.PMDSmellDetector;
 import smelldetectormerger.detectors.SmellDetector;
@@ -44,15 +45,17 @@ public class SmellDetectionHandler extends AbstractHandler {
 		CheckStyleSmellDetector checkStyleSmellDetector = new CheckStyleSmellDetector(bundle, javaProject);
 		DuDeSmellDetector dudeSmellDetector = new DuDeSmellDetector(bundle, javaProject);
 		JSpIRITSmellDetector jSpiritSmellDetector = new JSpIRITSmellDetector(selectedProject, javaProject);
+		JDeodorantSmellDetector jDeodorantSmellDetector = new JDeodorantSmellDetector(bundle, javaProject);
 		
 		Map<SmellType, Set<Smell>> detectedSmells = new HashMap<>();
 		
+		//Plugin detectors
+		detectCodeSmells(jDeodorantSmellDetector, detectedSmells);
+		detectCodeSmells(jSpiritSmellDetector, detectedSmells);
+		//Standalone detectors
 		detectCodeSmells(pmdSmellDetector, detectedSmells);
 		detectCodeSmells(checkStyleSmellDetector, detectedSmells);
 		detectCodeSmells(dudeSmellDetector, detectedSmells);
-		detectCodeSmells(jSpiritSmellDetector, detectedSmells);
-		
-//		JDeodorantSmellDetector.findSmells(bundle, javaProject);
 
 		try {
 			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
