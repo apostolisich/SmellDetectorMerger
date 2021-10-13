@@ -25,7 +25,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import smelldetector.smells.DuplicateCode;
 import smelldetector.smells.Smell;
 import smelldetector.smells.SmellType;
 
@@ -119,7 +118,7 @@ public class SmellsView extends ViewPart {
 			public void run() {
 				IStructuredSelection currentSelection = (IStructuredSelection) tableViewer.getStructuredSelection();
 				Smell codeSmell = (Smell) currentSelection.getFirstElement();
-				if(codeSmell instanceof DuplicateCode) {
+				if(codeSmell.getSmellTypeName().equals("Duplicate Code")) {
 					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), codeSmell.getTargetEndLine());
 				} else {
 					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), 0);

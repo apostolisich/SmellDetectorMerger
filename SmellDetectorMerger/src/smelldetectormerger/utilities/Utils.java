@@ -27,22 +27,9 @@ import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import smelldetector.smells.BrainClass;
-import smelldetector.smells.BrainMethod;
-import smelldetector.smells.DataClass;
-import smelldetector.smells.DisperseCoupling;
-import smelldetector.smells.DuplicateCode;
-import smelldetector.smells.FeatureEnvy;
-import smelldetector.smells.GodClass;
-import smelldetector.smells.IntensiveCoupling;
-import smelldetector.smells.LongMethod;
-import smelldetector.smells.LongParameterList;
-import smelldetector.smells.RefusedParentBequest;
-import smelldetector.smells.ShotgunSurgery;
 import smelldetector.smells.Smell;
+import smelldetector.smells.Smell.Builder;
 import smelldetector.smells.SmellType;
-import smelldetector.smells.TraditionBreaker;
-import smelldetector.smells.TypeChecking;
 
 public abstract class Utils {
 	
@@ -174,54 +161,79 @@ public abstract class Utils {
 	 * @throws Exception
 	 */
 	public static Smell createSmellObject(SmellType smellType, Object... args) throws Exception {
-		Smell codeSmell = null;
-		switch(smellType) {
-			case GOD_CLASS:
-				codeSmell = new GodClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-				break;
-			case LONG_METHOD:
-				codeSmell = new LongMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case LONG_PARAMETER_LIST:
-				codeSmell = new LongParameterList((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case DUPLICATE_CODE:
-				codeSmell = new DuplicateCode((Integer) args[0], (String) args[1], (IFile) args[2], (Integer) args[3], (Integer) args[4]);
-				break;
-			case BRAIN_CLASS:
-				codeSmell = new BrainClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-				break;
-			case BRAIN_METHOD:
-				codeSmell = new BrainMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case DATA_CLASS:
-				codeSmell = new DataClass((String) args[0], (IFile) args[1], (Integer) args[2]);
-				break;
-			case DISPERSE_COUPLING:
-				codeSmell = new DisperseCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case FEATURE_ENVY:
-				codeSmell = new FeatureEnvy((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case INTENSIVE_COUPLING:
-				codeSmell = new IntensiveCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case REFUSED_PARENT_BEQUEST:
-				codeSmell = new RefusedParentBequest((String) args[0], (IFile) args[1], (Integer) args[2]);
-				break;
-			case SHOTGUN_SURGERY:
-				codeSmell = new ShotgunSurgery((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			case TRADITION_BREAKER:
-				codeSmell = new TraditionBreaker((String) args[0], (IFile) args[1], (Integer) args[2]);
-				break;
-			case TYPE_CHECKING:
-				codeSmell = new TypeChecking((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
-				break;
-			default:
-				throw new Exception("Unexpected smell type: " + smellType.getName());
+		Builder codeSmellBuilder;
+		
+		/** @formatter: off */
+		if(smellType == SmellType.DUPLICATE_CODE) {
+			codeSmellBuilder = new Smell.Builder(smellType)
+											.setDuplicationGroupId((Integer) args[0])
+											.setClassName((String) args[1])
+											.setTargetIFile((IFile) args[2])
+											.setStartLine((Integer) args[3])
+											.setEndLine((Integer) args[4]);
+		} else if(Utils.isClassSmell(smellType)) {
+			codeSmellBuilder = new Smell.Builder(smellType)
+											.setClassName((String) args[0])
+											.setTargetIFile((IFile) args[1])
+											.setStartLine((Integer) args[2]);
+		} else {
+			codeSmellBuilder = new Smell.Builder(smellType)
+											.setClassName((String) args[0])
+											.setMethodName((String) args[1])
+											.setTargetIFile((IFile) args[2])
+											.setStartLine((Integer) args[3]);
 		}
-		return codeSmell;
+		/** @formatter: on */
+		
+		return codeSmellBuilder.build();
+//		Smell codeSmell = null;
+//		switch(smellType) {
+//			case GOD_CLASS:
+//				codeSmell = new GodClass((String) args[0], (IFile) args[1], (Integer) args[2]);
+//				break;
+//			case LONG_METHOD:
+//				codeSmell = new LongMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case LONG_PARAMETER_LIST:
+//				codeSmell = new LongParameterList((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case DUPLICATE_CODE:
+//				codeSmell = new DuplicateCode((Integer) args[0], (String) args[1], (IFile) args[2], (Integer) args[3], (Integer) args[4]);
+//				break;
+//			case BRAIN_CLASS:
+//				codeSmell = new BrainClass((String) args[0], (IFile) args[1], (Integer) args[2]);
+//				break;
+//			case BRAIN_METHOD:
+//				codeSmell = new BrainMethod((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case DATA_CLASS:
+//				codeSmell = new DataClass((String) args[0], (IFile) args[1], (Integer) args[2]);
+//				break;
+//			case DISPERSE_COUPLING:
+//				codeSmell = new DisperseCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case FEATURE_ENVY:
+//				codeSmell = new FeatureEnvy((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case INTENSIVE_COUPLING:
+//				codeSmell = new IntensiveCoupling((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case REFUSED_PARENT_BEQUEST:
+//				codeSmell = new RefusedParentBequest((String) args[0], (IFile) args[1], (Integer) args[2]);
+//				break;
+//			case SHOTGUN_SURGERY:
+//				codeSmell = new ShotgunSurgery((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			case TRADITION_BREAKER:
+//				codeSmell = new TraditionBreaker((String) args[0], (IFile) args[1], (Integer) args[2]);
+//				break;
+//			case TYPE_CHECKING:
+//				codeSmell = new TypeChecking((String) args[0], (String) args[1], (IFile) args[2], (Integer) args[3]);
+//				break;
+//			default:
+//				throw new Exception("Unexpected smell type: " + smellType.getName());
+//		}
+//		return codeSmell;
 	}
 	
 	/**
