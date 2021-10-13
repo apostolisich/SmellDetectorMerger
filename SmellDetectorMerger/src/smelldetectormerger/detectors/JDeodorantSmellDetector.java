@@ -71,8 +71,6 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		SmellType godClassSmellType = SmellType.GOD_CLASS;
 		
 		for(ExtractClassCandidateGroup group: godClasses) {
-//			ExtractClassCandidateRefactoring candidate = group.getCandidates().get(0);
-			
 			group.getCandidates().forEach( candidate -> {
 				String source = candidate.getSource();
 				String className = source.substring(source.lastIndexOf('.') + 1);
