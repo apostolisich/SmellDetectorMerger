@@ -113,7 +113,7 @@ public class PMDSmellDetector extends SmellDetector {
 	 * @throws Exception 
 	 */
 	private void extractDuplicates(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		int duplicatesCounter = detectedSmells.containsKey(SmellType.DUPLICATE_CODE) ? detectedSmells.get(SmellType.DUPLICATE_CODE).size() : 0;
+		int duplicationGroupId = Utils.getGreatestDuplicationGroupId(detectedSmells);
 		
 		NodeList duplicationNodes = xmlDoc.getDocumentElement().getElementsByTagName("duplication");
 		for(int i = 0; i < duplicationNodes.getLength(); i++) {
@@ -134,11 +134,11 @@ public class PMDSmellDetector extends SmellDetector {
 				String filePath = path.substring(path.indexOf("\\", path.indexOf(javaProject.getPath().makeRelative().toString())));
 				IFile targetFile = javaProject.getProject().getFile(filePath);
 				
-				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, 
-						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicatesCounter, className, targetFile, startLine, endLine));
+				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, getDetectorName(), 
+						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicationGroupId, className, targetFile, startLine, endLine));
 			}
 			
-			duplicatesCounter++;
+			duplicationGroupId++;
 		}
 	}
 	
@@ -186,10 +186,12 @@ public class PMDSmellDetector extends SmellDetector {
 				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
 				
 				if(smellType == SmellType.GOD_CLASS) {
-					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = violationNode.getAttributes().getNamedItem("method").getNodeValue();
-					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}

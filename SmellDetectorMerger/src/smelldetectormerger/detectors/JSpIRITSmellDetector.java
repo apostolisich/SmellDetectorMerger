@@ -114,11 +114,11 @@ public class JSpIRITSmellDetector extends SmellDetector {
 				IFile targetIFile = javaProject.getProject().getFile(String.format("src\\%s.java", smell.getMainClassName().replace('.', '\\')));
 				
 				if(Utils.isClassSmell(detectedSmellType)) {
-					Utils.addSmell(detectedSmellType, detectedSmells, 
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(detectedSmellType, smell.getElementName(), targetIFile, smell.getLine()));
 				} else {
 					String[] elementName = smell.getElementName().split("\\.");
-					Utils.addSmell(detectedSmellType, detectedSmells,
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(detectedSmellType, elementName[0], elementName[1], targetIFile, smell.getLine()));
 				}
 			}

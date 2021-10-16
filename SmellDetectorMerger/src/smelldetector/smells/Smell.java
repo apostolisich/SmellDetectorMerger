@@ -1,6 +1,8 @@
 package smelldetector.smells;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 
@@ -9,13 +11,15 @@ import smelldetectormerger.utilities.Utils;
 public class Smell {
 	
 	//This is only used for DuplicateCode smell type
-	private int duplicationGroupId;
+	private final int duplicationGroupId;
 	private final SmellType smellType;
 	private final String className;
 	private final String methodName;
 	private final IFile targetIFile;
 	private final int startLine;
 	private final int endLine;
+	
+	private Set<String> detectorNamesSet;
 	
 	private Smell(Builder builder) {
 		this.duplicationGroupId = builder.duplicationGroupId;
@@ -25,6 +29,8 @@ public class Smell {
 		this.targetIFile = builder.targetIFile;
 		this.startLine = builder.startLine;
 		this.endLine = builder.endLine;
+		
+		detectorNamesSet = new HashSet<>();
 	}
 	
 	public String getAffectedElementName() {
@@ -52,9 +58,30 @@ public class Smell {
 	public int getTargetEndLine() {
 		return endLine;
 	}
+	
+	public int getDuplicationGroupId() {
+		return duplicationGroupId;
+	}
+	
+	public void addDetectorName(String detectorName) {
+		detectorNamesSet.add(detectorName);
+	}
+	
+	public String getDetectorNames() {
+		StringBuilder builder = new StringBuilder();
+		detectorNamesSet.forEach( detectorName -> {
+			if(builder.length() != 0)
+				builder.append(", ");
+			
+			builder.append(detectorName);
+		});
+		
+		return builder.toString();
+	}
 
+	@Override
 	public int hashCode() {
-		return Objects.hash(className, endLine, methodName, smellType, startLine, targetIFile);
+		return Objects.hash(className, duplicationGroupId, endLine, methodName, smellType, startLine);
 	}
 
 	@Override
@@ -66,11 +93,13 @@ public class Smell {
 		if (getClass() != obj.getClass())
 			return false;
 		Smell other = (Smell) obj;
-		return Objects.equals(className, other.className) && endLine == other.endLine
-				&& Objects.equals(methodName, other.methodName) && smellType == other.smellType
-				&& startLine == other.startLine;
+		return Objects.equals(className, other.className) /*&& duplicationGroupId == other.duplicationGroupId*/
+				&& endLine == other.endLine && Objects.equals(methodName, other.methodName)
+				&& smellType == other.smellType && startLine == other.startLine;
 	}
-	
+
+
+
 	public static class Builder {
 		//This is only used for DuplicateCode smell type
 		private int duplicationGroupId;

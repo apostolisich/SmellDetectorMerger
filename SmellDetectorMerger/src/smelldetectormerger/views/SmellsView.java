@@ -74,6 +74,15 @@ public class SmellsView extends ViewPart {
 				return smell.getAffectedElementName();
 			}
 		});
+		
+		TableViewerColumn detectedToolCounterColumn = createNewColumn("Detected by", 200);
+		detectedToolCounterColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Smell smell = (Smell) element;
+				return String.valueOf(smell.getDetectorNames());
+			}
+		});
 	}
 	
 	/**

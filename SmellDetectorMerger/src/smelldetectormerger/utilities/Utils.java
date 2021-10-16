@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,8 +66,9 @@ public abstract class Utils {
 	 * @param commandList a list that contains the parts of the command to be processed
 	 * @param returnOutput a flag that indicates whether output should be returned or not
 	 * @return the output of the command after it's run
+	 * @throws InterruptedException 
 	 */
-	public static String runCommand(List<String> commandList, boolean returnOutput) {
+	public static String runCommand(List<String> commandList, boolean returnOutput) throws InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder(commandList);
 		pb.redirectErrorStream(true);
 		
@@ -74,6 +78,7 @@ public abstract class Utils {
 			Process p = pb.start();
 			
 			if(!returnOutput) {
+				p.waitFor(2, TimeUnit.MINUTES);
 				p.destroy();
 				return null;
 			}
@@ -195,12 +200,18 @@ public abstract class Utils {
 	 * @param detectedSmells a {@code Map} that contains the detected smells
 	 * @param newSmell the new {@code Smell} to be added
 	 */
-	public static void addSmell(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells, Smell newSmell) {
+	public static void addSmell(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells, String detectorName, Smell newSmell) {
 		if(!detectedSmells.containsKey(smellType)) {
 			detectedSmells.put(smellType, new LinkedHashSet<Smell>());
 		}
 		
-		detectedSmells.get(smellType).add(newSmell);
+		Set<Smell> detectedSmellsForSmellType = detectedSmells.get(smellType);
+		if(detectedSmellsForSmellType.contains(newSmell)) {
+			detectedSmellsForSmellType.stream().filter( smell -> smell.equals(newSmell)).findFirst().orElse(null).addDetectorName(detectorName);
+		} else {
+			newSmell.addDetectorName(detectorName);
+			detectedSmellsForSmellType.add(newSmell);
+		}
 	}
 	
 	/**
@@ -246,5 +257,29 @@ public abstract class Utils {
         }
         
         return 0;      
+	}
+	
+	/**
+	 * Finds either the greatest duplication group id from the already detected duplicates, or
+	 * returns 1 if no duplicates already exist.
+	 * 
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
+	 * @return the greatest duplication group id from existing duplicates or 1 if none already exist
+	 */
+	public static int getGreatestDuplicationGroupId(Map<SmellType, Set<Smell>> detectedSmells) {
+		if(detectedSmells.containsKey(SmellType.DUPLICATE_CODE)) {
+			return Collections.max(detectedSmells.get(SmellType.DUPLICATE_CODE), new Comparator<Smell>() {
+			    @Override
+			    public int compare(Smell first, Smell second) {
+			        if (first.getDuplicationGroupId() > second.getDuplicationGroupId())
+			            return 1;
+			        else if (first.getDuplicationGroupId() < second.getDuplicationGroupId())
+			            return -1;
+			        return 0;
+			    }
+			}).getDuplicationGroupId() + 1;
+		}
+		
+		return 1;
 	}
 }

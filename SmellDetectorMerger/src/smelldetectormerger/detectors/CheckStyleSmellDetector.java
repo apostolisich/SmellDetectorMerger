@@ -136,7 +136,8 @@ public class CheckStyleSmellDetector extends SmellDetector {
 				
 				if(smellType == SmellType.GOD_CLASS) {
 					//CheckStyle returns line 1 in case a GodClass is found, instead of the line in which the class is declared
-					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = "";
 					if(smellType == SmellType.LONG_PARAMETER_LIST) {
@@ -146,7 +147,8 @@ public class CheckStyleSmellDetector extends SmellDetector {
 						methodName = message.substring(0, message.indexOf(" "));
 					}
 					
-					Utils.addSmell(smellType, detectedSmells, Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}

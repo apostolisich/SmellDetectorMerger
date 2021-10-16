@@ -90,7 +90,7 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceClassTypeDeclaration().getStartPosition());
 				
 				try {
-					Utils.addSmell(godClassSmellType, detectedSmells, 
+					Utils.addSmell(godClassSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(godClassSmellType, className, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore
@@ -113,7 +113,7 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceMethodDeclaration().getStartPosition());
 				
 				try {
-					Utils.addSmell(longMethodSmellType, detectedSmells,
+					Utils.addSmell(longMethodSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(longMethodSmellType, className, methodName, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore
@@ -138,7 +138,7 @@ public class JDeodorantSmellDetector extends SmellDetector {
 			ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 			int startLine = Utils.getLineNumFromOffset(cu, candidateRefactoring.getPositions().get(0).getOffset());
 
-			Utils.addSmell(featureEnvySmellType, detectedSmells,
+			Utils.addSmell(featureEnvySmellType, detectedSmells, getDetectorName(),
 					Utils.createSmellObject(featureEnvySmellType, className, methodName, targetIFile, startLine));
 		}
 	}
@@ -157,7 +157,7 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getTypeCheckMethod().getStartPosition());
 				
 				try {
-					Utils.addSmell(typeCheckingSmellType, detectedSmells,
+					Utils.addSmell(typeCheckingSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(typeCheckingSmellType, className, methodName, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore

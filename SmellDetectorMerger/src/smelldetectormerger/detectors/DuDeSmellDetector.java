@@ -118,10 +118,10 @@ public class DuDeSmellDetector extends SmellDetector {
 	 * @throws Exception 
 	 */
 	private void extractDuplicates(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		int duplicatesCounter = detectedSmells.containsKey(SmellType.DUPLICATE_CODE) ? detectedSmells.get(SmellType.DUPLICATE_CODE).size() : 1;
+		int duplicationGroupId = Utils.getGreatestDuplicationGroupId(detectedSmells);
 		
 		NodeList dupChains = xmlDoc.getDocumentElement().getElementsByTagName("DupChain");
-		for(int i = 0; i < dupChains.getLength(); i++) {
+		dupChainLoop: for(int i = 0; i < dupChains.getLength(); i++) {
 			NodeList codeSnippets = dupChains.item(i).getChildNodes();
 			for(int j = 0; j < codeSnippets.getLength(); j++) {
 				Node codeSnippet = codeSnippets.item(j);
@@ -131,18 +131,18 @@ public class DuDeSmellDetector extends SmellDetector {
 				
 				String fileName = codeSnippet.getAttributes().getNamedItem("FileName").getNodeValue();
 				if(!fileName.endsWith(".java"))
-					continue;
+					continue dupChainLoop;
 				
 				String className = fileName.substring(fileName.lastIndexOf("\\") + 1);
 				IFile targetIFile = javaProject.getProject().getFile(fileName);
 				int startLine = Integer.parseInt(codeSnippet.getAttributes().getNamedItem("From").getNodeValue());
 				int endLine = Integer.parseInt(codeSnippet.getAttributes().getNamedItem("To").getNodeValue());
 				
-				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, 
-						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicatesCounter, className, targetIFile, startLine, endLine));
+				Utils.addSmell(SmellType.DUPLICATE_CODE, detectedSmells, getDetectorName(),
+						Utils.createSmellObject(SmellType.DUPLICATE_CODE, duplicationGroupId, className, targetIFile, startLine, endLine));
 			}
 			
-			duplicatesCounter++;
+			duplicationGroupId++;
 		}
 	}
 }
