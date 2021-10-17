@@ -53,7 +53,10 @@ public class DuDeSmellDetector extends SmellDetector {
 		
 		writeSelectedProjectPathToConfigFile(dudeConfigFile);
 		
-		Utils.runCommand(buildToolCommand(dudeJarFile, dudeConfigFile), false);
+		String dudeDirectory = dudeJarFile.getAbsolutePath().toString();
+		dudeDirectory = dudeDirectory.substring(0, dudeDirectory.lastIndexOf("\\") + 1);
+		
+		Utils.runCommand(buildToolCommand(dudeJarFile, dudeConfigFile), dudeDirectory, false);
 		
 		for(int i = 0; i < 3; i++) {
 			File resultsFile = Utils.createFile(bundle, String.format("dude/Result%d.xml", i));
@@ -93,14 +96,6 @@ public class DuDeSmellDetector extends SmellDetector {
 	private List<String> buildToolCommand(File dudeJarFile, File dudeConfigFile) throws JavaModelException {
 		List<String> dudeCmdList = new ArrayList<>();
 		
-		String dudeDirectory = dudeJarFile.getAbsolutePath().toString();
-		dudeDirectory = dudeDirectory.substring(0, dudeDirectory.lastIndexOf("\\") + 1);
-		
-		dudeCmdList.add("cmd");
-		dudeCmdList.add("/c");
-		dudeCmdList.add("cd");
-		dudeCmdList.add(dudeDirectory);
-		dudeCmdList.add("&&");
 		dudeCmdList.add("java");
 		dudeCmdList.add("-cp");
 		dudeCmdList.add(dudeJarFile.getAbsolutePath());
@@ -145,4 +140,5 @@ public class DuDeSmellDetector extends SmellDetector {
 			duplicationGroupId++;
 		}
 	}
+
 }

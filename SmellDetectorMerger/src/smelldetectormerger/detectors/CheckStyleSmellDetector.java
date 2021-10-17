@@ -54,7 +54,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 		File checkStyleJarFile = Utils.createFile(bundle, "checkstyle-8.45/checkstyle-8.45-all.jar");
 		File checkStyleConfigFile = Utils.createFile(bundle, "checkstyle-8.45/checkstyle-config.xml");
 		
-		String toolOutput = Utils.runCommand(buildToolCommand(checkStyleJarFile, checkStyleConfigFile), true);
+		String toolOutput = Utils.runCommand(buildToolCommand(checkStyleJarFile, checkStyleConfigFile), null, true);
 		Document xmlDoc = Utils.getXmlDocument(toolOutput);
 		
 		extractSmells(xmlDoc, detectedSmells);

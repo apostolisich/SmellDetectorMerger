@@ -68,22 +68,26 @@ public abstract class Utils {
 	 * @return the output of the command after it's run
 	 * @throws InterruptedException 
 	 */
-	public static String runCommand(List<String> commandList, boolean returnOutput) throws InterruptedException {
+	public static String runCommand(List<String> commandList, String directory, boolean returnOutput) throws InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder(commandList);
 		pb.redirectErrorStream(true);
+		if(directory != null && !directory.isEmpty())
+			pb.directory(new File(directory));
 		
 		StringBuilder output = new StringBuilder();
-		BufferedReader reader;
 		try {
 			Process p = pb.start();
 			
 			if(!returnOutput) {
 				p.waitFor(2, TimeUnit.MINUTES);
 				p.destroy();
+				if(!p.waitFor(20, TimeUnit.SECONDS))
+					p.destroyForcibly();
+				
 				return null;
 			}
 				
-			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
 					
 			String line;
 			while((line = reader.readLine()) != null) {
@@ -95,6 +99,7 @@ public abstract class Utils {
 				output.append("\n");
 			}
 			
+			reader.close();
 			p.destroy();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -282,4 +287,5 @@ public abstract class Utils {
 		
 		return 1;
 	}
+	
 }

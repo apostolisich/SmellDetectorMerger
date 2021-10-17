@@ -68,12 +68,12 @@ public class PMDSmellDetector extends SmellDetector {
 //			return extractSmells(xmlDoc, smellType);
 //		}
 		
-		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), true);
+		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
 		Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
 		
 		extractDuplicates(cpdXmlDoc, detectedSmells);
 		
-		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), true);
+		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
 		Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
 			
 		extractSmells(pmdXmlDoc, detectedSmells);
