@@ -1,8 +1,8 @@
 package smelldetectormerger.smells;
 
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
 
@@ -30,7 +30,7 @@ public class Smell {
 		this.startLine = builder.startLine;
 		this.endLine = builder.endLine;
 		
-		detectorNamesSet = new HashSet<>();
+		detectorNamesSet = new TreeSet<>();
 	}
 	
 	public String getAffectedElementName() {
