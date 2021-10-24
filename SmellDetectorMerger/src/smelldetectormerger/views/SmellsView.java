@@ -1,8 +1,10 @@
 package smelldetectormerger.views;
 
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -16,6 +18,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchPage;
@@ -33,6 +37,9 @@ public class SmellsView extends ViewPart {
 	public static final String ID = "smelldetectormerger.views.SmellsView";
 	
 	private TableViewer tableViewer;
+	private TableViewerColumn smellTypeColumn;
+	private TableViewerColumn affectedElementColumn;
+	private TableViewerColumn detectedToolCounterColumn;
 		
 	@Override
 	public void createPartControl(Composite parent) {
@@ -57,7 +64,7 @@ public class SmellsView extends ViewPart {
 	 * Creates the needed columns for the table and adds them to the table view.
 	 */
 	private void createColumns() {
-		TableViewerColumn smellTypeColumn = createNewColumn("Smell Type", 170);
+		smellTypeColumn = createNewColumn("Smell Type", 170);
 		smellTypeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -65,8 +72,9 @@ public class SmellsView extends ViewPart {
 				return smell.getSmellTypeName();
 			}
 		});
+		smellTypeColumn.getColumn().addListener(SWT.Selection, COLUMN_SORT_LISTENER);
 		
-		TableViewerColumn affectedElementColumn = createNewColumn("Affected Element", 300);
+		affectedElementColumn = createNewColumn("Affected Element", 300);
 		affectedElementColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
@@ -74,15 +82,17 @@ public class SmellsView extends ViewPart {
 				return smell.getAffectedElementName();
 			}
 		});
+		affectedElementColumn.getColumn().addListener(SWT.Selection, COLUMN_SORT_LISTENER);
 		
-		TableViewerColumn detectedToolCounterColumn = createNewColumn("Detected by", 200);
+		detectedToolCounterColumn = createNewColumn("Detected by", 200);
 		detectedToolCounterColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				Smell smell = (Smell) element;
-				return String.valueOf(smell.getDetectorNames());
+				return smell.getDetectorNames();
 			}
 		});
+		detectedToolCounterColumn.getColumn().addListener(SWT.Selection, COLUMN_SORT_LISTENER);
 	}
 	
 	/**
@@ -169,5 +179,55 @@ public class SmellsView extends ViewPart {
 			//TODO It would be better to show an error message here
 		}
 	}
-
+	
+	private final Listener COLUMN_SORT_LISTENER = new Listener() {
+		@Override
+		public void handleEvent(Event e) {
+			TableColumn column = (TableColumn) e.widget;
+			
+			@SuppressWarnings("unchecked")
+			Set<Smell> detectedSmells = (Set<Smell>) tableViewer.getInput();
+			
+			Set<Smell> sortedSmells = null;
+			if(column == smellTypeColumn.getColumn())
+				sortedSmells = new TreeSet<Smell>(SMELL_NAME_COMPARATOR);
+			else if(column == affectedElementColumn.getColumn())
+				sortedSmells = new TreeSet<Smell>(AFFECTED_ELEMENT_COMPARATOR);
+			else
+				sortedSmells = new TreeSet<Smell>(DETECTOR_NAMES_COMPARATOR);
+				
+			sortedSmells.addAll(detectedSmells);
+			tableViewer.getTable().setSortColumn(column);
+			tableViewer.getTable().removeAll();
+			tableViewer.setInput(sortedSmells);
+		}
+	};
+	
+	private final Comparator<Smell> SMELL_NAME_COMPARATOR = new Comparator<Smell> () {
+		@Override
+		public int compare(Smell o1, Smell o2) {
+			int result = o1.getSmellTypeName().toLowerCase().compareTo(o2.getSmellTypeName().toLowerCase());
+			//Hack to avoid deleting elements in case they are equal with those already in the set.
+			return result == 0 ? -1 : result;
+		}
+	};
+	
+	private final Comparator<Smell> AFFECTED_ELEMENT_COMPARATOR = new Comparator<Smell> () {
+		@Override
+		public int compare(Smell o1, Smell o2) {
+			int result = o1.getAffectedElementName().toLowerCase().compareTo(o2.getAffectedElementName().toLowerCase());
+			//Hack to avoid deleting elements in case they are equal with those already in the set.
+			return result == 0 ? -1 : result;
+		}
+	};
+	
+	private final Comparator<Smell> DETECTOR_NAMES_COMPARATOR = new Comparator<Smell> () {
+		@Override
+		public int compare(Smell o1, Smell o2) {
+			int result = o1.getDetectorNames().toLowerCase().compareTo(o2.getDetectorNames().toLowerCase());
+			//Hack to avoid deleting elements in case they are equal with those already in the set.
+			return result == 0 ? -1 : result;
+		}
+	};
+ 
 }
