@@ -1,34 +1,21 @@
 package smelldetectormerger.handlers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.osgi.framework.Bundle;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
 import smelldetectormerger.Activator;
-import smelldetectormerger.detectors.CheckStyleSmellDetector;
-import smelldetectormerger.detectors.DuDeSmellDetector;
-import smelldetectormerger.detectors.JDeodorantSmellDetector;
-import smelldetectormerger.detectors.JSpIRITSmellDetector;
-import smelldetectormerger.detectors.PMDSmellDetector;
-import smelldetectormerger.detectors.SmellDetector;
-import smelldetectormerger.views.SmellsView;
+import smelldetectormerger.detectionmanager.SmellDetectionManager;
+import smelldetectormerger.smells.SmellType;
+import smelldetectormerger.utilities.Utils;
 
 public class SmellDetectionHandler extends AbstractHandler {
 
@@ -38,33 +25,18 @@ public class SmellDetectionHandler extends AbstractHandler {
 		if(selectedProject == null)
 			return null;
 		
-		IJavaProject javaProject = JavaCore.create(selectedProject);
-		Bundle bundle = Activator.getDefault().getBundle();
-		
-		PMDSmellDetector pmdSmellDetector = new PMDSmellDetector(bundle, javaProject);
-		CheckStyleSmellDetector checkStyleSmellDetector = new CheckStyleSmellDetector(bundle, javaProject);
-		DuDeSmellDetector dudeSmellDetector = new DuDeSmellDetector(bundle, javaProject);
-		JSpIRITSmellDetector jSpiritSmellDetector = new JSpIRITSmellDetector(selectedProject, javaProject);
-		JDeodorantSmellDetector jDeodorantSmellDetector = new JDeodorantSmellDetector(bundle, javaProject);
-		
-		Map<SmellType, Set<Smell>> detectedSmells = new HashMap<>();
-		
-		//Plugin detectors
-		detectCodeSmells(jDeodorantSmellDetector, detectedSmells);
-		detectCodeSmells(jSpiritSmellDetector, detectedSmells);
-		//Standalone detectors
-		detectCodeSmells(pmdSmellDetector, detectedSmells);
-		detectCodeSmells(checkStyleSmellDetector, detectedSmells);
-		detectCodeSmells(dudeSmellDetector, detectedSmells);
-
-		try {
-			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-					getActivePage().showView("smelldetectormerger.views.SmellsView");
-			smellsView.addDetectedSmells(detectedSmells);
-		} catch (PartInitException e1) {
-			e1.printStackTrace();
+		SmellType selectedSmellType = Utils.getSmellTypeFromName(event);
+		if(selectedSmellType == null) {
+			openErrorMessageDialog(event, "Something went wrong. Please try again...");
+			return null;
 		}
 		
+		Bundle bundle = Activator.getDefault().getBundle();
+		
+		SmellDetectionManager smellDetectionManager = new SmellDetectionManager(selectedSmellType, bundle, selectedProject);
+		smellDetectionManager.detectCodeSmells();
+		smellDetectionManager.displayDetectedSmells();
+
 		return null;
 	}
 	
@@ -83,12 +55,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		try {
 			selectedProject = (IProject) (((StructuredSelection) selection).getFirstElement());
 		} catch(ClassCastException ex) {
-			IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-			MessageDialog.openInformation(
-					window.getShell(),
-					"SmellDetectorMerger",
-					"Please right click on the project's root folder and try again...");
-			
+			openErrorMessageDialog(event, "Please right click on the project's root folder and try again...");
 			return null;
 		}
 		
@@ -96,17 +63,17 @@ public class SmellDetectionHandler extends AbstractHandler {
 	}
 	
 	/**
-	 * Finds code smells using the given detector and returns the results.
+	 * Opens a new message dialog with the given error message.
 	 * 
-	 * @param smellDetector the detector to check the selected project for smells
-	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
+	 * @param event the event that triggered the tool
+	 * @param message the error message to be displayed
+	 * @throws ExecutionException
 	 */
-	private void detectCodeSmells(SmellDetector smellDetector, Map<SmellType, Set<Smell>> detectedSmells) {
-		try {
-			smellDetector.findSmells(null, detectedSmells);
-		} catch(Exception e) {
-			e.printStackTrace();
-			//Ignore if an error is thrown. The flow should continue with the rest of the tools.
-		}
+	private void openErrorMessageDialog(ExecutionEvent event, String message) throws ExecutionException {
+		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+		MessageDialog.openInformation(
+				window.getShell(),
+				"SmellDetectorMerger",
+				message);
 	}
 }

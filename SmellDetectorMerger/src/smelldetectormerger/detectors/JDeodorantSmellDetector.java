@@ -22,8 +22,8 @@ import gr.uom.java.jdeodorant.refactoring.views.FeatureEnvy;
 import gr.uom.java.jdeodorant.refactoring.views.GodClass;
 import gr.uom.java.jdeodorant.refactoring.views.LongMethod;
 import gr.uom.java.jdeodorant.refactoring.views.TypeChecking;
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
 
 public class JDeodorantSmellDetector extends SmellDetector {
@@ -54,32 +54,29 @@ public class JDeodorantSmellDetector extends SmellDetector {
 
 	@Override
 	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		GodClass gd = new GodClass();
-		gd.setActiveProject(javaProject);
-		TopicFinder.setStopWordsFileUrl(bundle.getEntry("essentials/glasgowstoplist.txt"));
-		ExtractClassCandidateGroup[] godClasses = gd.getTable();
-		extractGodClassSmells(godClasses, detectedSmells);
-		
-		LongMethod lm = new LongMethod();
-		lm.setActiveProject(javaProject);
-		ASTSliceGroup[] longMethods = lm.getTable();
-		extractLongMethodSmells(longMethods, detectedSmells);
-		
-		FeatureEnvy featureEnvy = new FeatureEnvy();
-		featureEnvy.setActiveProject(javaProject);
-		CandidateRefactoring[] featureEnvies = featureEnvy.getTable();
-		extractFeatureEnvySmells(featureEnvies, detectedSmells);
-		
-		TypeChecking tc = new TypeChecking();
-		tc.setActiveProject(javaProject);
-		TypeCheckEliminationGroup[] typeCheckings = tc.getTable();
-		extractTypeCheckingSmells(typeCheckings, detectedSmells);
+		if(smellType == SmellType.ALL_SMELLS) {
+			extractGodClassSmells(SmellType.GOD_CLASS, detectedSmells);
+			extractLongMethodSmells(SmellType.LONG_METHOD, detectedSmells);
+			extractFeatureEnvySmells(SmellType.FEATURE_ENVY, detectedSmells);
+			extractTypeCheckingSmells(SmellType.TYPE_CHECKING, detectedSmells);
+		} else if(smellType == SmellType.GOD_CLASS) {
+			extractGodClassSmells(smellType, detectedSmells);
+		} else if(smellType == SmellType.LONG_METHOD) {
+			extractLongMethodSmells(smellType, detectedSmells);
+		} else if(smellType == SmellType.FEATURE_ENVY) {
+			extractFeatureEnvySmells(smellType, detectedSmells);
+		} else {
+			extractTypeCheckingSmells(smellType, detectedSmells);
+		}
 	}
 	
-	private void extractGodClassSmells(ExtractClassCandidateGroup[] godClasses, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		SmellType godClassSmellType = SmellType.GOD_CLASS;
+	private void extractGodClassSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		GodClass godClass = new GodClass();
+		godClass.setActiveProject(javaProject);
+		TopicFinder.setStopWordsFileUrl(bundle.getEntry("essentials/glasgowstoplist.txt"));
+		ExtractClassCandidateGroup[] godClassSmells = godClass.getTable();
 		
-		for(ExtractClassCandidateGroup group: godClasses) {
+		for(ExtractClassCandidateGroup group: godClassSmells) {
 			group.getCandidates().forEach( candidate -> {
 				String source = candidate.getSource();
 				String className = source.substring(source.lastIndexOf('.') + 1);
@@ -90,8 +87,8 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceClassTypeDeclaration().getStartPosition());
 				
 				try {
-					Utils.addSmell(godClassSmellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(godClassSmellType, className, targetIFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(smellType, className, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore
 				}
@@ -99,8 +96,10 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		}
 	}
 	
-	private void extractLongMethodSmells(ASTSliceGroup[] longMethods, Map<SmellType, Set<Smell>> detectedSmells) {
-		SmellType longMethodSmellType = SmellType.LONG_METHOD;
+	private void extractLongMethodSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		LongMethod longMethod = new LongMethod();
+		longMethod.setActiveProject(javaProject);
+		ASTSliceGroup[] longMethods = longMethod.getTable();
 		
 		for(ASTSliceGroup group: longMethods) {
 			group.getCandidates().forEach( candidate -> {
@@ -113,8 +112,8 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceMethodDeclaration().getStartPosition());
 				
 				try {
-					Utils.addSmell(longMethodSmellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(longMethodSmellType, className, methodName, targetIFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore
 				}
@@ -122,10 +121,12 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		}
 	}
 	
-	private void extractFeatureEnvySmells(CandidateRefactoring[] featureEnvies, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		SmellType featureEnvySmellType = SmellType.FEATURE_ENVY;
+	private void extractFeatureEnvySmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		FeatureEnvy featureEnvy = new FeatureEnvy();
+		featureEnvy.setActiveProject(javaProject);
+		CandidateRefactoring[] featureEnvySmells = featureEnvy.getTable();
 		
-		for(CandidateRefactoring candidateRefactoring: featureEnvies) {
+		for(CandidateRefactoring candidateRefactoring: featureEnvySmells) {
 			MoveMethodCandidateRefactoring moveMethodCandidate = (MoveMethodCandidateRefactoring) candidateRefactoring;
 			
 			String sourceClass = moveMethodCandidate.getSourceClass().getName();
@@ -138,15 +139,17 @@ public class JDeodorantSmellDetector extends SmellDetector {
 			ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 			int startLine = Utils.getLineNumFromOffset(cu, candidateRefactoring.getPositions().get(0).getOffset());
 
-			Utils.addSmell(featureEnvySmellType, detectedSmells, getDetectorName(),
-					Utils.createSmellObject(featureEnvySmellType, className, methodName, targetIFile, startLine));
+			Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+					Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
 		}
 	}
 	
-	private void extractTypeCheckingSmells(TypeCheckEliminationGroup[] typeCheckings, Map<SmellType, Set<Smell>> detectedSmells) {
-		SmellType typeCheckingSmellType = SmellType.TYPE_CHECKING;
+	private void extractTypeCheckingSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) {
+		TypeChecking typeChecking = new TypeChecking();
+		typeChecking.setActiveProject(javaProject);
+		TypeCheckEliminationGroup[] typeCheckingSmells = typeChecking.getTable();
 		
-		for(TypeCheckEliminationGroup group: typeCheckings) {
+		for(TypeCheckEliminationGroup group: typeCheckingSmells) {
 			group.getCandidates().forEach( candidate -> {
 				String className = candidate.getTypeCheckClass().getName().getIdentifier();
 				String methodName = candidate.getTypeCheckMethod().getName().getIdentifier();
@@ -157,8 +160,8 @@ public class JDeodorantSmellDetector extends SmellDetector {
 				int startLine = Utils.getLineNumFromOffset(cu, candidate.getTypeCheckMethod().getStartPosition());
 				
 				try {
-					Utils.addSmell(typeCheckingSmellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(typeCheckingSmellType, className, methodName, targetIFile, startLine));
+					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
 				} catch (Exception e) {
 					//Ignore
 				}

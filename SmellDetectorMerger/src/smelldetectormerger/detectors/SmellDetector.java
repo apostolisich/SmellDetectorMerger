@@ -3,8 +3,8 @@ package smelldetectormerger.detectors;
 import java.util.Map;
 import java.util.Set;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 
 public abstract class SmellDetector {
 	

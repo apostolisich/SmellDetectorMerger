@@ -1,4 +1,4 @@
-package smelldetector.smells;
+package smelldetectormerger.smells;
 
 import java.util.HashSet;
 import java.util.Objects;

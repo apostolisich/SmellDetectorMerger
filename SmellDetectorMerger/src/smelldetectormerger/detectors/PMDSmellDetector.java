@@ -19,8 +19,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
 
 public class PMDSmellDetector extends SmellDetector {
@@ -56,27 +56,17 @@ public class PMDSmellDetector extends SmellDetector {
 		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
 		File cpdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/cpd.bat");
 		
-//		if(smellType.equals(SmellType.DUPLICATE_CODE)) {
-//			String commandOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile));
-//			Document xmlDoc = Utils.getXmlDocument(commandOutput);
-//			
-//			return extractDuplicates(xmlDoc);
-//		} else {
-//			String commandOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile));
-//			Document xmlDoc = Utils.getXmlDocument(commandOutput);
-//				
-//			return extractSmells(xmlDoc, smellType);
-//		}
-		
-		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
-		Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
-		
-		extractDuplicates(cpdXmlDoc, detectedSmells);
-		
-		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
-		Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
+		if(smellType == SmellType.DUPLICATE_CODE) {
+			String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
+			Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
 			
-		extractSmells(pmdXmlDoc, detectedSmells);
+			extractDuplicates(cpdXmlDoc, detectedSmells);
+		} else {
+			String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
+			Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
+			
+			extractSmells(smellType, pmdXmlDoc, detectedSmells);
+		}
 	}
 	
 	/**
@@ -164,7 +154,7 @@ public class PMDSmellDetector extends SmellDetector {
 	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
-	private void extractSmells(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+	private void extractSmells(SmellType smellType, Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int fileIndex = 0; fileIndex < fileNodes.getLength(); fileIndex++) {
 			Node fileNode = fileNodes.item(fileIndex);
@@ -179,19 +169,20 @@ public class PMDSmellDetector extends SmellDetector {
 				if(!violationNode.getNodeName().equals("violation"))
 					continue;
 				
-				int startLine = Integer.parseInt(violationNode.getAttributes().getNamedItem("beginline").getNodeValue());
-				String detectedSmell = violationNode.getAttributes().getNamedItem("rule").getNodeValue();
-					
-				String className = violationNode.getAttributes().getNamedItem("class").getNodeValue();
-				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
+				SmellType detectedSmellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(violationNode.getAttributes().getNamedItem("rule").getNodeValue());
+				if(smellType != SmellType.ALL_SMELLS  && smellType != detectedSmellType)
+					continue;
 				
-				if(smellType == SmellType.GOD_CLASS) {
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+				int startLine = Integer.parseInt(violationNode.getAttributes().getNamedItem("beginline").getNodeValue());
+				String className = violationNode.getAttributes().getNamedItem("class").getNodeValue();
+				
+				if(detectedSmellType == SmellType.GOD_CLASS) {
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
 							Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
 				} else {
 					String methodName = violationNode.getAttributes().getNamedItem("method").getNodeValue();
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(detectedSmellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}

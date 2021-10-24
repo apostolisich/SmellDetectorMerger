@@ -22,8 +22,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
 
 public class CheckStyleSmellDetector extends SmellDetector {
@@ -37,7 +37,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 	}
 	
 	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
-			new HashSet<SmellType>(Arrays.asList(SmellType.DUPLICATE_CODE)));
+			new HashSet<SmellType>(Arrays.asList(SmellType.GOD_CLASS, SmellType.LONG_METHOD, SmellType.LONG_PARAMETER_LIST)));
 
 	@Override
 	public Set<SmellType> getSupportedSmellTypes() {
@@ -57,7 +57,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 		String toolOutput = Utils.runCommand(buildToolCommand(checkStyleJarFile, checkStyleConfigFile), null, true);
 		Document xmlDoc = Utils.getXmlDocument(toolOutput);
 		
-		extractSmells(xmlDoc, detectedSmells);
+		extractSmells(smellType, xmlDoc, detectedSmells);
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
-	private void extractSmells(Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+	private void extractSmells(SmellType smellType, Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		NodeList fileNodes = xmlDoc.getDocumentElement().getElementsByTagName("file");
 		for(int i = 0; i < fileNodes.getLength(); i++) {
 			Node fileNode = fileNodes.item(i);
@@ -129,26 +129,27 @@ public class CheckStyleSmellDetector extends SmellDetector {
 					continue;
 				
 				String source = errorNode.getAttributes().getNamedItem("source").getNodeValue();
-				String detectedSmell = source.substring(source.lastIndexOf('.') + 1);
+				SmellType detectedSmellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(source.substring(source.lastIndexOf('.') + 1));
+				if(smellType != SmellType.ALL_SMELLS && smellType != detectedSmellType)
+					continue;
+				
 				int startLine = Integer.parseInt(errorNode.getAttributes().getNamedItem("line").getNodeValue());
 				
-				SmellType smellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(detectedSmell);
-				
-				if(smellType == SmellType.GOD_CLASS) {
+				if(detectedSmellType == SmellType.GOD_CLASS) {
 					//CheckStyle returns line 1 in case a GodClass is found, instead of the line in which the class is declared
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(SmellType.GOD_CLASS, className, targetFile, startLine));
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(detectedSmellType, className, targetFile, startLine));
 				} else {
 					String methodName = "";
-					if(smellType == SmellType.LONG_PARAMETER_LIST) {
+					if(detectedSmellType == SmellType.LONG_PARAMETER_LIST) {
 						methodName = extractMethodNameFromFile(targetFile, startLine);
 					} else {
 						String message = errorNode.getAttributes().getNamedItem("message").getNodeValue().replace("Method ", "");
 						methodName = message.substring(0, message.indexOf(" "));
 					}
 					
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(smellType, className, methodName, targetFile, startLine));
+					Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
+							Utils.createSmellObject(detectedSmellType, className, methodName, targetFile, startLine));
 				}
 			}
 		}

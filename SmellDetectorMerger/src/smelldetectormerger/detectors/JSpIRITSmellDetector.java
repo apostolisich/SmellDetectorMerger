@@ -12,8 +12,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IJavaProject;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
 import spirit.changes.manager.CodeChanges;
 import spirit.core.design.AgglomerationManager;
@@ -111,6 +111,9 @@ public class JSpIRITSmellDetector extends SmellDetector {
 			Vector<CodeSmell> codeSmells = codeSmellManager.getSmells();
 			for (CodeSmell smell: codeSmells) {
 				SmellType detectedSmellType = MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE.get(smell.getKindOfSmellName());
+				if(smellType != SmellType.ALL_SMELLS && smellType != detectedSmellType)
+					continue;
+				
 				IFile targetIFile = javaProject.getProject().getFile(String.format("src\\%s.java", smell.getMainClassName().replace('.', '\\')));
 				
 				if(Utils.isClassSmell(detectedSmellType)) {

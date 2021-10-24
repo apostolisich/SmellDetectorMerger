@@ -19,8 +19,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
 
 public class DuDeSmellDetector extends SmellDetector {

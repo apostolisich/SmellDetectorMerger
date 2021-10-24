@@ -1,7 +1,9 @@
-package smelldetector.smells;
+package smelldetectormerger.smells;
 
 public enum SmellType {
 	
+	//The below is just a SmellType to represent cases that the user wants to detect all smells
+	ALL_SMELLS(""),
 	GOD_CLASS("God Class"),
 	LONG_METHOD("Long Method"),
 	LONG_PARAMETER_LIST("Long Parameter List"),
@@ -13,7 +15,7 @@ public enum SmellType {
 	DISPERSE_COUPLING("Disperse Coupling"),
 	INTENSIVE_COUPLING("Intensive Coupling"),
 	REFUSED_PARENT_BEQUEST("Refused Parent Bequest"),
-	SHOTGUN_SURGERY("Shotgut Surgery"),
+	SHOTGUN_SURGERY("Shotgun Surgery"),
 	TRADITION_BREAKER("Tradition Breaker"),
 	TYPE_CHECKING("Type Checking");
 	

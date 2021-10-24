@@ -10,15 +10,141 @@
       </category>
       <command
             categoryId="SmellDetectorMerger.commands.category"
-            name="Detect Code Smells"
-            id="SmellDetectorMerger.commands.findSmellsCommand">
+            name="All smells"
+            id="SmellDetectorMerger.commands.findAllSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="God Class"
+            id="SmellDetectorMerger.commands.findGodClassSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Long Method"
+            id="SmellDetectorMerger.commands.findLongMethodSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Long Parameter List"
+            id="SmellDetectorMerger.commands.findLongParameterListSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Feature Envy"
+            id="SmellDetectorMerger.commands.findFeatureEnvySmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Duplicate Code"
+            id="SmellDetectorMerger.commands.findDuplicateCodeSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Brain Class"
+            id="SmellDetectorMerger.commands.findBrainClassSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Brain Method"
+            id="SmellDetectorMerger.commands.findBrainMethodSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Data Class"
+            id="SmellDetectorMerger.commands.findDataClassSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Disperse Coupling"
+            id="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Intensive Coupling"
+            id="SmellDetectorMerger.commands.findIntensiveCouplingSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Refused Parent Bequest"
+            id="SmellDetectorMerger.commands.findRefusedParentBequestSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Shotgun Surgery"
+            id="SmellDetectorMerger.commands.findShotgunSurgerySmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Tradition Breaker"
+            id="SmellDetectorMerger.commands.findTraditionBreakerSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Type Checking"
+            id="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="smelldetectormerger.handlers.SmellDetectionHandler"
-            commandId="SmellDetectorMerger.commands.findSmellsCommand">
+            commandId="SmellDetectorMerger.commands.findAllSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findGodClassSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findLongMethodSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findLongParameterListSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findFeatureEnvySmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findDuplicateCodeSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findBrainClassSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findBrainMethodSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findDataClassSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findIntensiveCouplingSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findRefusedParentBequestSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findShotgunSurgerySmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findTraditionBreakerSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
       </handler>
    </extension>
    <extension
@@ -30,10 +156,66 @@
                label="SmellDetectorMerger"
                mnemonic="M">
             <command
-                  commandId="SmellDetectorMerger.commands.findSmellsCommand"
-                  id="SmellDetectorMerger.menus.findSmellsCommand"
+                  commandId="SmellDetectorMerger.commands.findAllSmellsCommand"
+                  id="SmellDetectorMerger.menus.findAllSmellsCommand"
                   mnemonic="S">
             </command>
+            <command
+		          commandId="SmellDetectorMerger.commands.findGodClassSmellsCommand"
+		          id="SmellDetectorMerger.commands.findGodClassSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findLongMethodSmellsCommand"
+		          id="SmellDetectorMerger.commands.findLongMethodSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findLongParameterListSmellsCommand"
+		          id="SmellDetectorMerger.commands.findLongParameterListSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findFeatureEnvySmellsCommand"
+		          id="SmellDetectorMerger.commands.findFeatureEnvySmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findDuplicateCodeSmellsCommand"
+		          id="SmellDetectorMerger.commands.findDuplicateCodeSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findBrainClassSmellsCommand"
+		          id="SmellDetectorMerger.commands.findBrainClassSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findBrainMethodSmellsCommand"
+		          id="SmellDetectorMerger.commands.findBrainMethodSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findDataClassSmellsCommand"
+		          id="SmellDetectorMerger.commands.findDataClassSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand"
+		          id="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findIntensiveCouplingSmellsCommand"
+		          id="SmellDetectorMerger.commands.findIntensiveCouplingSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findRefusedParentBequestSmellsCommand"
+		          id="SmellDetectorMerger.commands.findRefusedParentBequestSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findShotgunSurgerySmellsCommand"
+		          id="SmellDetectorMerger.commands.findShotgunSurgerySmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findTraditionBreakerSmellsCommand"
+		          id="SmellDetectorMerger.commands.findTraditionBreakerSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand"
+		          id="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
+		    </command>
          </menu>
       </menuContribution>
    </extension>

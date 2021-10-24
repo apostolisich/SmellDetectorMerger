@@ -19,6 +19,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
@@ -30,9 +32,9 @@ import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import smelldetector.smells.Smell;
-import smelldetector.smells.Smell.Builder;
-import smelldetector.smells.SmellType;
+import smelldetectormerger.smells.Smell;
+import smelldetectormerger.smells.Smell.Builder;
+import smelldetectormerger.smells.SmellType;
 
 public abstract class Utils {
 	
@@ -286,6 +288,55 @@ public abstract class Utils {
 		}
 		
 		return 1;
+	}
+	
+	/**
+	 * Returns the {@code SmellType} that corresponds the given smell name.
+	 * 
+	 * @param smellName the smellName for which to get the {@code SmellType}
+	 * @return the correct {@code SmellType}
+	 */
+	public static SmellType getSmellTypeFromName(ExecutionEvent triggeredEvent) {
+		try {
+			String smellName = triggeredEvent.getCommand().getName();
+			
+			switch(smellName) {
+				case "God Class":
+					return SmellType.GOD_CLASS;
+				case "Long Method":
+					return SmellType.LONG_METHOD;
+				case "Long Parameter List":
+					return SmellType.LONG_PARAMETER_LIST;
+				case "Feature Envy":
+					return SmellType.FEATURE_ENVY;
+				case "Duplicate Code":
+					return SmellType.DUPLICATE_CODE;
+				case "Brain Class":
+					return SmellType.BRAIN_CLASS;
+				case "Brain Method":
+					return SmellType.BRAIN_METHOD;
+				case "Data Class":
+					return SmellType.DATA_CLASS;
+				case "Disperse Coupling":
+					return SmellType.DISPERSE_COUPLING;
+				case "Intensive Coupling":
+					return SmellType.INTENSIVE_COUPLING;
+				case "Refused Parent Bequest":
+					return SmellType.REFUSED_PARENT_BEQUEST;
+				case "Shotgun Surgery":
+					return SmellType.SHOTGUN_SURGERY;
+				case "Tradition Breaker":
+					return SmellType.TRADITION_BREAKER;
+				case "Type Checking":
+					return SmellType.TYPE_CHECKING;
+				default:
+					return SmellType.ALL_SMELLS;
+			}
+		} catch (NotDefinedException e) {
+			//If an error is returned, null is returned here and then an error dialog will be shown to the user
+			//via the SmellDetectionHandler.
+			return null;
+		}
 	}
 	
 }
