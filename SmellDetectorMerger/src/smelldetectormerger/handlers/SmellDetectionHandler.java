@@ -27,7 +27,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		
 		SmellType selectedSmellType = Utils.getSmellTypeFromName(event);
 		if(selectedSmellType == null) {
-			openErrorMessageDialog(event, "Something went wrong. Please try again...");
+			Utils.openErrorMessageDialog("Something went wrong. Please try again...");
 			return null;
 		}
 		
@@ -55,25 +55,11 @@ public class SmellDetectionHandler extends AbstractHandler {
 		try {
 			selectedProject = (IProject) (((StructuredSelection) selection).getFirstElement());
 		} catch(ClassCastException ex) {
-			openErrorMessageDialog(event, "Please right click on the project's root folder and try again...");
+			Utils.openErrorMessageDialog("Please right click on the project's root folder and try again...");
 			return null;
 		}
 		
 		return selectedProject;
 	}
 	
-	/**
-	 * Opens a new message dialog with the given error message.
-	 * 
-	 * @param event the event that triggered the tool
-	 * @param message the error message to be displayed
-	 * @throws ExecutionException
-	 */
-	private void openErrorMessageDialog(ExecutionEvent event, String message) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		MessageDialog.openInformation(
-				window.getShell(),
-				"SmellDetectorMerger",
-				message);
-	}
 }

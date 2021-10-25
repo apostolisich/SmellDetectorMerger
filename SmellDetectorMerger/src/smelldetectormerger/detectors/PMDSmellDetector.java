@@ -28,10 +28,9 @@ public class PMDSmellDetector extends SmellDetector {
 	private Bundle bundle;
 	private IJavaProject javaProject;
 	
-	public PMDSmellDetector(Bundle bundle, IJavaProject javaProject, boolean isEnabled) {
+	public PMDSmellDetector(Bundle bundle, IJavaProject javaProject) {
 		this.bundle = bundle;
 		this.javaProject = javaProject;
-		this.isEnabled = isEnabled;
 	}
 	
 	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(

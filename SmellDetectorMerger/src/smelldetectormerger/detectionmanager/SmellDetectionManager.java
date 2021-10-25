@@ -1,5 +1,6 @@
 package smelldetectormerger.detectionmanager;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,12 +8,16 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.ui.progress.IProgressService;
 import org.osgi.framework.Bundle;
 
 import smelldetectormerger.detectors.CheckStyleSmellDetector;
@@ -24,6 +29,7 @@ import smelldetectormerger.detectors.SmellDetector;
 import smelldetectormerger.preferences.PreferenceConstants;
 import smelldetectormerger.smells.Smell;
 import smelldetectormerger.smells.SmellType;
+import smelldetectormerger.utilities.Utils;
 import smelldetectormerger.views.SmellsView;
 
 public class SmellDetectionManager {
@@ -46,36 +52,61 @@ public class SmellDetectionManager {
 	private void initialiseSmellDetectors() {
 		IJavaProject javaProject = JavaCore.create(selectedProject);
 		
-		boolean useAllDetectors = scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes");
-		
 		smellDetectors = new ArrayList<>(5);
-		smellDetectors.add(new PMDSmellDetector(bundle, javaProject,
-				useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED)));
-		smellDetectors.add(new CheckStyleSmellDetector(bundle, javaProject,
-				useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED)));
-		smellDetectors.add(new DuDeSmellDetector(bundle, javaProject,
-				useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED)));
-		smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject,
-				useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED)));
-		smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject,
-				useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED)));
+		if(scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes")) {
+			smellDetectors.add(new PMDSmellDetector(bundle, javaProject));
+			smellDetectors.add(new CheckStyleSmellDetector(bundle, javaProject));
+			smellDetectors.add(new DuDeSmellDetector(bundle, javaProject));
+			smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
+			smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
+		} else {
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
+				smellDetectors.add(new PMDSmellDetector(bundle, javaProject));
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED))
+				smellDetectors.add(new CheckStyleSmellDetector(bundle, javaProject));
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED))
+				smellDetectors.add(new DuDeSmellDetector(bundle, javaProject));
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED))
+				smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
+				smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
+		}
 	}
 	
 	public void detectCodeSmells() {
 		detectedSmells = new HashMap<>();
 		
-		for(SmellDetector detector: smellDetectors) {
-			if(detector.isEnabled() && 
-					(smellTypeToBeDetected == SmellType.ALL_SMELLS || detector.getSupportedSmellTypes().contains(smellTypeToBeDetected))) {
-				try {
-					detector.findSmells(smellTypeToBeDetected, detectedSmells);
-				} catch (Exception e) {
-					//Ignore if an error is thrown. The flow should continue with the rest of the tools.
+		IWorkbench wb = PlatformUI.getWorkbench();
+		IProgressService ps = wb.getProgressService();
+		
+		try {
+			ps.busyCursorWhile(new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
+					progressMonitor.beginTask(String.format("Detecting code smells"), smellDetectors.size());
+					
+					for(SmellDetector detector: smellDetectors) {
+						if(smellTypeToBeDetected == SmellType.ALL_SMELLS || detector.getSupportedSmellTypes().contains(smellTypeToBeDetected)) {
+							try {
+								detector.findSmells(smellTypeToBeDetected, detectedSmells);
+							} catch (Exception e) {
+								//Ignore if an error is thrown. The flow should continue with the rest of the tools.
+							}
+						}
+						progressMonitor.worked(1);
+					}
+					progressMonitor.done();
 				}
-			}
+			});
+		} catch (InvocationTargetException | InterruptedException e1) {
+			Utils.openErrorMessageDialog("An unexpected error occured. Please try again...");
 		}
 	}
 	
+	/**
+	 * Adds the smells view to the workbench and then fills the view with the detected
+	 * smells data.
+	 */
 	public void displayDetectedSmells() {
 		try {
 			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
