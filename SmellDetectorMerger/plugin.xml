@@ -228,5 +228,13 @@
             id="smelldetectormerger.views.SmellsView">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="smelldetectormerger.preferences.PreferencePage"
+            id="smelldetectormerger.preferences.PreferencePage"
+            name="SmellDetectorMerger">
+      </page>
+   </extension>
 
 </plugin>

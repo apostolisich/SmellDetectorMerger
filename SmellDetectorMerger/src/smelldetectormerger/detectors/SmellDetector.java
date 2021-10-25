@@ -8,6 +8,8 @@ import smelldetectormerger.smells.SmellType;
 
 public abstract class SmellDetector {
 	
+	protected boolean isEnabled;
+	
 	/**
 	 * A method that returns all the code smell types that can be found from the
 	 * detector.
@@ -32,5 +34,15 @@ public abstract class SmellDetector {
 	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
 	 */
 	public abstract void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception;
+	
+	/**
+	 * A method that returns whether the detector is enabled via the Preferences selected by
+	 * the user or not.
+	 * 
+	 * @return true if the detector is enabled; false otherwise
+	 */
+	public boolean isEnabled() {
+		return isEnabled;
+	}
 
 }

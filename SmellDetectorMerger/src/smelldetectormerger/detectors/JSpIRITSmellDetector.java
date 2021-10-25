@@ -29,9 +29,10 @@ public class JSpIRITSmellDetector extends SmellDetector {
 	private IProject selectedProject;
 	private IJavaProject javaProject;
 	
-	public JSpIRITSmellDetector(IProject selectedProject, IJavaProject javaProject) {
+	public JSpIRITSmellDetector(IProject selectedProject, IJavaProject javaProject, boolean isEnabled) {
 		this.selectedProject = selectedProject;
 		this.javaProject = javaProject;
+		this.isEnabled = isEnabled;
 	}
 
 	private static final Set<SmellType> SUPPORTED_SMELL_TYPES = Collections.unmodifiableSet(
