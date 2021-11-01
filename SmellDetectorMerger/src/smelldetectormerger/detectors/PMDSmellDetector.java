@@ -51,22 +51,32 @@ public class PMDSmellDetector extends SmellDetector {
 	
 	@Override
 	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
-		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
-		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
-		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
+		if(smellType == SmellType.ALL_SMELLS) {
+			detectCPDDuplicates(detectedSmells);
+			detectPMDSmells(smellType, detectedSmells);
+		} else {
+			if(smellType == SmellType.DUPLICATE_CODE) {
+				detectCPDDuplicates(detectedSmells);
+			} else {
+				detectPMDSmells(smellType, detectedSmells);
+			}
+		}
+	}
+	
+	/**
+	 * A method responsible to find and extract the duplicate code smells for the selected
+	 * project using CPD.
+	 * 
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
+	 * @throws Exception
+	 */
+	private void detectCPDDuplicates(Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		File cpdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/cpd.bat");
 		
-		if(smellType == SmellType.DUPLICATE_CODE) {
-			String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
-			Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
-			
-			extractDuplicates(cpdXmlDoc, detectedSmells);
-		} else {
-			String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
-			Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
-			
-			extractSmells(smellType, pmdXmlDoc, detectedSmells);
-		}
+		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
+		Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
+		
+		extractDuplicates(cpdXmlDoc, detectedSmells);
 	}
 	
 	/**
@@ -133,6 +143,25 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 	
 	/**
+	 * A method responsible to find and extract the rest of the smells that are supported
+	 * by PMD.
+	 * 
+	 * @param smellType the type of smells to be detected
+	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
+	 * @throws Exception
+	 */
+	private void detectPMDSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
+		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
+		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
+		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
+		
+		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
+		Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
+		
+		extractSmells(smellType, pmdXmlDoc, detectedSmells);
+	}
+	
+	/**
 	 * A map that contains the code smells detected from the tool as the key, and their
 	 * corresponding {@code SmellType} as the value.
 	 */
@@ -146,12 +175,12 @@ public class PMDSmellDetector extends SmellDetector {
 	}
 
 	/**
-	 * Extracts God Class, Long Method and Long Parameter List code smells and returns a set
-	 * that contains all of them.
+	 * Extracts God Class, Long Method and Long Parameter List code smells and adds them
+	 * to the {@code Map} of detected smells.
 	 * 
+	 * @param smellType the type of smell to be detected
 	 * @param xmlDoc an XML {@code Document} that contains the results of the detection
 	 * @param detectedSmells a {@code Map} from smellType to a {@code Set} of detected smells
-	 * @return a set which contains all the detected smells of the given smell type
 	 * @throws Exception
 	 */
 	private void extractSmells(SmellType smellType, Document xmlDoc, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
