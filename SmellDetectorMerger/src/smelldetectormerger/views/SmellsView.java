@@ -31,6 +31,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import smelldetectormerger.smells.Smell;
 import smelldetectormerger.smells.SmellType;
+import smelldetectormerger.utilities.Utils;
 
 public class SmellsView extends ViewPart {
 
@@ -158,7 +159,8 @@ public class SmellsView extends ViewPart {
 	 * at the given line.
 	 * 
 	 * @param targetFile the file to be opened (a java class)
-	 * @param startLine the line of the element that contains the smell
+	 * @param startLine the starting line of the element that contains the smell
+	 * @param endLine the ending line of the element that contains the smell
 	 */
 	private void openFile(IFile targetIFile, int startLine, int endLine) {
 		try {
@@ -176,7 +178,7 @@ public class SmellsView extends ViewPart {
 			IDE.openEditor(page, marker);
 			marker.delete();
 		} catch(Exception e) {
-			//TODO It would be better to show an error message here
+			Utils.openErrorMessageDialog("An error occured while trying to display the selected smell. Pleast try again...");
 		}
 	}
 	
