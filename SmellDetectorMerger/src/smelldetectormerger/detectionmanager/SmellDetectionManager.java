@@ -20,6 +20,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.progress.IProgressService;
 import org.osgi.framework.Bundle;
 
+import smelldetectormerger.Activator;
 import smelldetectormerger.detectors.CheckStyleSmellDetector;
 import smelldetectormerger.detectors.DuDeSmellDetector;
 import smelldetectormerger.detectors.JDeodorantSmellDetector;
@@ -42,10 +43,10 @@ public class SmellDetectionManager {
 	private Map<SmellType, Set<Smell>> detectedSmells;
 	private ScopedPreferenceStore scopedPreferenceStore;
 	
-	public SmellDetectionManager(SmellType smellType, Bundle bundle, IProject selectedProject) {
+	public SmellDetectionManager(SmellType smellType, IProject selectedProject) {
 		this.smellTypeToBeDetected = smellType;
-		this.bundle = bundle;
 		this.selectedProject = selectedProject;
+		this.bundle = Activator.getDefault().getBundle();
 		scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "SmellDetectorMerger");
 		initialiseSmellDetectors();
 	}

@@ -7,9 +7,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.Bundle;
 
-import smelldetectormerger.Activator;
 import smelldetectormerger.detectionmanager.SmellDetectionManager;
 import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
@@ -28,9 +26,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 			return null;
 		}
 		
-		Bundle bundle = Activator.getDefault().getBundle();
-		
-		SmellDetectionManager smellDetectionManager = new SmellDetectionManager(selectedSmellType, bundle, selectedProject);
+		SmellDetectionManager smellDetectionManager = new SmellDetectionManager(selectedSmellType, selectedProject);
 		smellDetectionManager.detectCodeSmells();
 		smellDetectionManager.displayDetectedSmells();
 
