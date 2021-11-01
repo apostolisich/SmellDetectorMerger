@@ -22,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.URIUtil;
@@ -232,7 +233,9 @@ public abstract class Utils {
 	 */
 	public static boolean isClassSmell(SmellType smellType) {
 		if(smellType == SmellType.GOD_CLASS || smellType == SmellType.BRAIN_CLASS || smellType == SmellType.DATA_CLASS ||
-				smellType == SmellType.REFUSED_PARENT_BEQUEST || smellType == SmellType.TRADITION_BREAKER)
+		   smellType == SmellType.REFUSED_PARENT_BEQUEST || smellType == SmellType.TRADITION_BREAKER || smellType == SmellType.COMPLEX_CLASS ||
+		   smellType == SmellType.CLASS_DATA_SHOULD_BE_PRIVATE || smellType == SmellType.LAZY_CLASS || smellType == SmellType.SPECULATIVE_GENERALITY ||
+		   smellType == SmellType.SPAGHETTI_CODE)
 			return true;
 		
 		return false;
@@ -267,6 +270,39 @@ public abstract class Utils {
         }
         
         return 0;      
+	}
+	
+	/**
+	 * Parses the given {@code IFile} until it reaches the given line and then extracts the
+	 * method name in that line.
+	 * 
+	 * @param targetFile the {@code IFile} that will be parsed
+	 * @param methodLine the line in which the method is declared
+	 * @return the name of the method in the given line of the given file
+	 * @throws Exception
+	 */
+	public static String extractMethodNameFromFile(IFile targetFile, int methodLine) throws Exception {
+		try(BufferedReader reader = new BufferedReader(new InputStreamReader(targetFile.getContents()))) {
+			int lineCounter = 1;
+			String line;
+			while((line = reader.readLine()) != null) {
+				//A "hack" needed because there can be cases in which a method has an annotation or java
+				//doc, so the methodLine corresponds to these instead of the actual declaration line
+				if((lineCounter == methodLine || lineCounter > methodLine) && line.indexOf('(') != -1)
+					break;
+				
+				lineCounter++;
+			}
+			
+			if(line == null)
+				throw new Exception("End of file reached");
+			
+			line = line.substring(0, line.indexOf('('));
+			
+			return line.substring(line.lastIndexOf(" ") + 1);
+		} catch (IOException | CoreException e) {
+			throw e;
+		}
 	}
 	
 	/**
@@ -332,6 +368,18 @@ public abstract class Utils {
 					return SmellType.TRADITION_BREAKER;
 				case "Type Checking":
 					return SmellType.TYPE_CHECKING;
+				case "Class Data Should Be Private":
+					return SmellType.CLASS_DATA_SHOULD_BE_PRIVATE;
+				case "Complex Class":
+					return SmellType.COMPLEX_CLASS;
+				case "Lazy Class":
+					return SmellType.LAZY_CLASS;
+				case "Message Chain":
+					return SmellType.MESSAGE_CHAIN;
+				case "Speculative Generality":
+					return SmellType.SPECULATIVE_GENERALITY;
+				case "Spaghetti Code":
+					return SmellType.SPAGHETTI_CODE;
 				default:
 					return SmellType.ALL_SMELLS;
 			}

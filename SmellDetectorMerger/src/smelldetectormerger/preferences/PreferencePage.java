@@ -24,9 +24,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	private BooleanFieldEditor jDeodorant;
 	private BooleanFieldEditor jSpirit;
 	private BooleanFieldEditor pmd;
+	private BooleanFieldEditor organic;
 	private ScopedPreferenceStore scopedPreferences;
-	
-	//https://www.vogella.com/tutorials/EclipsePreferences/article.html
 	
 	public PreferencePage() {
 		super(GRID);
@@ -57,19 +56,21 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		
 		smellDetectorsGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
 		smellDetectorsGroup.setLayout(new GridLayout(1, false));
-		smellDetectorsGroup.setText("Selected Smell Detectors");
+		smellDetectorsGroup.setText("Enabled Smell Detectors");
 		
 		checkStyle = new BooleanFieldEditor(PreferenceConstants.CHECKSTYLE_ENABLED, "CheckStyle", smellDetectorsGroup);
 		dude = new BooleanFieldEditor(PreferenceConstants.DUDE_ENABLED, "DuDe", smellDetectorsGroup);
 		jDeodorant = new BooleanFieldEditor(PreferenceConstants.JDEODORANT_ENABLED, "JDeodorant", smellDetectorsGroup);
 		jSpirit = new BooleanFieldEditor(PreferenceConstants.JSPIRIT_ENABLED, "JSpIRIT", smellDetectorsGroup);
 		pmd = new BooleanFieldEditor(PreferenceConstants.PMD_ENABLED, "PMD", smellDetectorsGroup);
+		organic = new BooleanFieldEditor(PreferenceConstants.ORGANIC_ENABLED, "Organic", smellDetectorsGroup);
 		
 		addField(checkStyle);
 		addField(dude);
 		addField(jDeodorant);
 		addField(jSpirit);
 		addField(pmd);
+		addField(organic);
 		
 		if(scopedPreferences.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes"))
 			disableDetectorsSelectionGroup();
@@ -93,6 +94,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		jDeodorant.setEnabled(false, smellDetectorsGroup);
 		jSpirit.setEnabled(false, smellDetectorsGroup);
 		pmd.setEnabled(false, smellDetectorsGroup);
+		organic.setEnabled(false, smellDetectorsGroup);
 	}
 	
 	private void enableDetectorsSelectionGroup() {
@@ -101,6 +103,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		jDeodorant.setEnabled(true, smellDetectorsGroup);
 		jSpirit.setEnabled(true, smellDetectorsGroup);
 		pmd.setEnabled(true, smellDetectorsGroup);
+		organic.setEnabled(true, smellDetectorsGroup);
 	}
 
 }

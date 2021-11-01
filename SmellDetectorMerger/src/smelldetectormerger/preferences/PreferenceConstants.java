@@ -8,5 +8,6 @@ public class PreferenceConstants {
 	public static final String JDEODORANT_ENABLED = "jDeodorantEnabled";
 	public static final String JSPIRIT_ENABLED = "jSpIRITEnabled";
 	public static final String PMD_ENABLED = "pmdEnabled";
+	public static final String ORGANIC_ENABLED = "organicEnabled";
 	
 }

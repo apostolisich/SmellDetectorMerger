@@ -15,6 +15,7 @@ public class PreferencePageInitializer extends AbstractPreferenceInitializer {
         scopedPreferenceStore.setDefault(PreferenceConstants.JDEODORANT_ENABLED, false);
         scopedPreferenceStore.setDefault(PreferenceConstants.JSPIRIT_ENABLED, false);
         scopedPreferenceStore.setDefault(PreferenceConstants.PMD_ENABLED, false);
+        scopedPreferenceStore.setDefault(PreferenceConstants.ORGANIC_ENABLED, false);
 	}
 
 }

@@ -24,6 +24,7 @@ import smelldetectormerger.detectors.CheckStyleSmellDetector;
 import smelldetectormerger.detectors.DuDeSmellDetector;
 import smelldetectormerger.detectors.JDeodorantSmellDetector;
 import smelldetectormerger.detectors.JSpIRITSmellDetector;
+import smelldetectormerger.detectors.OrganicSmellDetector;
 import smelldetectormerger.detectors.PMDSmellDetector;
 import smelldetectormerger.detectors.SmellDetector;
 import smelldetectormerger.preferences.PreferenceConstants;
@@ -59,6 +60,7 @@ public class SmellDetectionManager {
 			smellDetectors.add(new DuDeSmellDetector(bundle, javaProject));
 			smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
 			smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
+			smellDetectors.add(new OrganicSmellDetector(javaProject));
 		} else {
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
 				smellDetectors.add(new PMDSmellDetector(bundle, javaProject));
@@ -70,6 +72,8 @@ public class SmellDetectionManager {
 				smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
 				smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
+			if(scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED))
+				smellDetectors.add(new OrganicSmellDetector(javaProject));
 		}
 	}
 	
@@ -83,7 +87,7 @@ public class SmellDetectionManager {
 			ps.busyCursorWhile(new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
-					progressMonitor.beginTask(String.format("Detecting code smells"), smellDetectors.size());
+					progressMonitor.beginTask("Detecting code smells...", smellDetectors.size());
 					
 					for(SmellDetector detector: smellDetectors) {
 						if(smellTypeToBeDetected == SmellType.ALL_SMELLS || detector.getSupportedSmellTypes().contains(smellTypeToBeDetected)) {
@@ -114,7 +118,7 @@ public class SmellDetectionManager {
 			
 			smellsView.addDetectedSmells(detectedSmells);
 		} catch (PartInitException e1) {
-			e1.printStackTrace();
+			Utils.openErrorMessageDialog("An unexpected error occurred during the display of the detected smells. Please try again...");
 		}
 	}
 

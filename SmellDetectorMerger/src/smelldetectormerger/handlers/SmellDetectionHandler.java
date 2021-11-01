@@ -24,7 +24,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		
 		SmellType selectedSmellType = Utils.getSmellTypeFromName(event);
 		if(selectedSmellType == null) {
-			Utils.openErrorMessageDialog("Something went wrong. Please try again...");
+			Utils.openErrorMessageDialog("Unexpected smell type has been selected. Please try again...");
 			return null;
 		}
 		

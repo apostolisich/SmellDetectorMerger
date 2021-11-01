@@ -83,6 +83,36 @@
             name="Type Checking"
             id="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
       </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Class Should Be Private"
+            id="SmellDetectorMerger.commands.findClassShouldBePrivateSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Complex Class"
+            id="SmellDetectorMerger.commands.findComplexClassSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Lazy Class"
+            id="SmellDetectorMerger.commands.findLazyClassSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Message Chain"
+            id="SmellDetectorMerger.commands.findMessageChainSmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Speculative Generality"
+            id="SmellDetectorMerger.commands.findSpeculativeGeneralitySmellsCommand">
+      </command>
+      <command
+            categoryId="SmellDetectorMerger.commands.category"
+            name="Spaghetti Code"
+            id="SmellDetectorMerger.commands.findSpaghettiCodeSmellsCommand">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -145,6 +175,30 @@
       <handler
             class="smelldetectormerger.handlers.SmellDetectionHandler"
             commandId="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findClassShouldBePrivateSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findComplexClassSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findLazyClassSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findMessageChainSmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findSpeculativeGeneralitySmellsCommand">
+      </handler>
+      <handler
+            class="smelldetectormerger.handlers.SmellDetectionHandler"
+            commandId="SmellDetectorMerger.commands.findSpaghettiCodeSmellsCommand">
       </handler>
    </extension>
    <extension
@@ -215,6 +269,30 @@
 		    <command
 		          commandId="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand"
 		          id="SmellDetectorMerger.commands.findTypeCheckingSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findClassShouldBePrivateSmellsCommand"
+		          id="SmellDetectorMerger.commands.findClassShouldBePrivateSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findComplexClassSmellsCommand"
+		          id="SmellDetectorMerger.commands.findComplexClassSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findLazyClassSmellsCommand"
+		          id="SmellDetectorMerger.commands.findLazyClassSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findMessageChainSmellsCommand"
+		          id="SmellDetectorMerger.commands.findMessageChainSmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findSpeculativeGeneralitySmellsCommand"
+		          id="SmellDetectorMerger.commands.findSpeculativeGeneralitySmellsCommand">
+		    </command>
+		    <command
+		          commandId="SmellDetectorMerger.commands.findSpaghettiCodeSmellsCommand"
+		          id="SmellDetectorMerger.commands.findSpaghettiCodeSmellsCommand">
 		    </command>
          </menu>
       </menuContribution>

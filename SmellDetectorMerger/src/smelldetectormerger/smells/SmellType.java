@@ -17,7 +17,13 @@ public enum SmellType {
 	REFUSED_PARENT_BEQUEST("Refused Parent Bequest"),
 	SHOTGUN_SURGERY("Shotgun Surgery"),
 	TRADITION_BREAKER("Tradition Breaker"),
-	TYPE_CHECKING("Type Checking");
+	TYPE_CHECKING("Type Checking"),
+	CLASS_DATA_SHOULD_BE_PRIVATE("Class Data Should Be Private"),
+	COMPLEX_CLASS("Complex Class"),
+	LAZY_CLASS("Lazy Class"),
+	MESSAGE_CHAIN("Message Chain"),
+	SPECULATIVE_GENERALITY("Speculative Generality"),
+	SPAGHETTI_CODE("Spaghetti Code");
 	
 	private final String smellName;
 	

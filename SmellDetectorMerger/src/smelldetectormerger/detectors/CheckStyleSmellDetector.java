@@ -1,9 +1,6 @@
 package smelldetectormerger.detectors;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
@@ -142,7 +138,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 				} else {
 					String methodName = "";
 					if(detectedSmellType == SmellType.LONG_PARAMETER_LIST) {
-						methodName = extractMethodNameFromFile(targetFile, startLine);
+						methodName = Utils.extractMethodNameFromFile(targetFile, startLine);
 					} else {
 						String message = errorNode.getAttributes().getNamedItem("message").getNodeValue().replace("Method ", "");
 						methodName = message.substring(0, message.indexOf(" "));
@@ -152,34 +148,6 @@ public class CheckStyleSmellDetector extends SmellDetector {
 							Utils.createSmellObject(detectedSmellType, className, methodName, targetFile, startLine));
 				}
 			}
-		}
-	}
-	
-	/**
-	 * Parses the given {@code IFile} until it reaches the given line and then extracts the
-	 * method name in that line.
-	 * 
-	 * @param targetFile the {@code IFile} that will be parsed
-	 * @param methodLine the line in which the method is declared
-	 * @return the name of the method in the given line of the given file
-	 * @throws Exception
-	 */
-	private String extractMethodNameFromFile(IFile targetFile, int methodLine) throws Exception {
-		try(BufferedReader reader = new BufferedReader(new InputStreamReader(targetFile.getContents()))) {
-			int lineCounter = 1;
-			String line;
-			while((line = reader.readLine()) != null) {
-				if(lineCounter == methodLine)
-					break;
-				
-				lineCounter++;
-			}
-			
-			line = line.substring(0, line.indexOf('('));
-			
-			return line.substring(line.lastIndexOf(" ") + 1);
-		} catch (IOException | CoreException e) {
-			throw e;
 		}
 	}
 	
