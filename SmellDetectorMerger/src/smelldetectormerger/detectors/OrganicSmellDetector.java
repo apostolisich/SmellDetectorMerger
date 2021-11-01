@@ -38,7 +38,7 @@ public class OrganicSmellDetector extends SmellDetector {
 												 SmellType.MESSAGE_CHAIN,
 												 SmellType.REFUSED_PARENT_BEQUEST,
 												 SmellType.SPECULATIVE_GENERALITY,
-												 SmellType.DISPERSE_COUPLING,
+												 SmellType.DISPERSED_COUPLING,
 												 SmellType.INTENSIVE_COUPLING,
 												 SmellType.BRAIN_CLASS,
 												 SmellType.SHOTGUN_SURGERY,
@@ -68,7 +68,7 @@ public class OrganicSmellDetector extends SmellDetector {
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.RefusedBequest, SmellType.REFUSED_PARENT_BEQUEST);
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.SpeculativeGenerality, SmellType.SPECULATIVE_GENERALITY);
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.SpaghettiCode, SmellType.SPAGHETTI_CODE);
-		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.DispersedCoupling, SmellType.DISPERSE_COUPLING);
+		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.DispersedCoupling, SmellType.DISPERSED_COUPLING);
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.IntensiveCoupling, SmellType.INTENSIVE_COUPLING);
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.BrainClass, SmellType.BRAIN_CLASS);
 		MAP_FROM_SMELLNAME_TO_SMELLTYPE.put(SmellName.ShotgunSurgery, SmellType.SHOTGUN_SURGERY);

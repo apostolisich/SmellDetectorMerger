@@ -356,8 +356,8 @@ public abstract class Utils {
 					return SmellType.BRAIN_METHOD;
 				case "Data Class":
 					return SmellType.DATA_CLASS;
-				case "Disperse Coupling":
-					return SmellType.DISPERSE_COUPLING;
+				case "Dispersed Coupling":
+					return SmellType.DISPERSED_COUPLING;
 				case "Intensive Coupling":
 					return SmellType.INTENSIVE_COUPLING;
 				case "Refused Parent Bequest":

@@ -55,8 +55,8 @@
       </command>
       <command
             categoryId="SmellDetectorMerger.commands.category"
-            name="Disperse Coupling"
-            id="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+            name="Dispersed Coupling"
+            id="SmellDetectorMerger.commands.findDispersedCouplingSmellsCommand">
       </command>
       <command
             categoryId="SmellDetectorMerger.commands.category"
@@ -154,7 +154,7 @@
       </handler>
       <handler
             class="smelldetectormerger.handlers.SmellDetectionHandler"
-            commandId="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+            commandId="SmellDetectorMerger.commands.findDispersedCouplingSmellsCommand">
       </handler>
       <handler
             class="smelldetectormerger.handlers.SmellDetectionHandler"
@@ -247,8 +247,8 @@
 		          id="SmellDetectorMerger.commands.findDataClassSmellsCommand">
 		    </command>
 		    <command
-		          commandId="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand"
-		          id="SmellDetectorMerger.commands.findDisperseCouplingSmellsCommand">
+		          commandId="SmellDetectorMerger.commands.findDispersedCouplingSmellsCommand"
+		          id="SmellDetectorMerger.commands.findDispersedCouplingSmellsCommand">
 		    </command>
 		    <command
 		          commandId="SmellDetectorMerger.commands.findIntensiveCouplingSmellsCommand"

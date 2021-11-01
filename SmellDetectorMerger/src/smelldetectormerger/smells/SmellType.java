@@ -12,7 +12,7 @@ public enum SmellType {
 	BRAIN_CLASS("Brain Class"),
 	BRAIN_METHOD("Brain Method"),
 	DATA_CLASS("Data Class"),
-	DISPERSE_COUPLING("Disperse Coupling"),
+	DISPERSED_COUPLING("Dispersed Coupling"),
 	INTENSIVE_COUPLING("Intensive Coupling"),
 	REFUSED_PARENT_BEQUEST("Refused Parent Bequest"),
 	SHOTGUN_SURGERY("Shotgun Surgery"),

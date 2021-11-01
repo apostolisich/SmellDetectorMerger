@@ -39,7 +39,7 @@ public class JSpIRITSmellDetector extends SmellDetector {
 												SmellType.BRAIN_METHOD,
 												SmellType.LONG_METHOD,
 												SmellType.DATA_CLASS,
-												SmellType.DISPERSE_COUPLING,
+												SmellType.DISPERSED_COUPLING,
 												SmellType.FEATURE_ENVY,
 												SmellType.GOD_CLASS,
 												SmellType.INTENSIVE_COUPLING,
@@ -63,12 +63,12 @@ public class JSpIRITSmellDetector extends SmellDetector {
 	 */
 	private static final Map<String, SmellType> MAP_FROM_DECTECTED_SMELLS_TO_SMELLTYPE;
 	static {
-		Map<String, SmellType> tempMap = new HashMap<String, SmellType>(3);
+		Map<String, SmellType> tempMap = new HashMap<String, SmellType>(11);
 		tempMap.put("Brain Class", SmellType.BRAIN_CLASS);
 		tempMap.put("Brain Method", SmellType.BRAIN_METHOD);
 		tempMap.put("Long Method", SmellType.LONG_METHOD);
 		tempMap.put("Data Class", SmellType.DATA_CLASS);
-		tempMap.put("Dispersed Coupling", SmellType.DISPERSE_COUPLING);
+		tempMap.put("Dispersed Coupling", SmellType.DISPERSED_COUPLING);
 		tempMap.put("Feature Envy", SmellType.FEATURE_ENVY);
 		tempMap.put("God Class", SmellType.GOD_CLASS);
 		tempMap.put("Intensive Coupling", SmellType.INTENSIVE_COUPLING);
@@ -126,7 +126,7 @@ public class JSpIRITSmellDetector extends SmellDetector {
 				}
 			}
 		} catch (Exception e) {
-			//This could be ignored as well, since these exceptions are caught and ignored in the detection handler
+			//This could be ignored as well, since these exceptions are caught and ignored later
 			throw e;
 		}
 	}
