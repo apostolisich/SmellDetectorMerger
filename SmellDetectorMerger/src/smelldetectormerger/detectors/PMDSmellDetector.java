@@ -153,7 +153,7 @@ public class PMDSmellDetector extends SmellDetector {
 	private void detectPMDSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		File pmdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd.bat");
 		File pmdConfigFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-config.xml");
-		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/pmd-cache.txt");
+		File pmdCacheFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/pmd-cache.txt");
 		
 		String pmdOutput = Utils.runCommand(buildMainToolCommand(pmdBatFile, pmdConfigFile, pmdCacheFile), null, true);
 		Document pmdXmlDoc = Utils.getXmlDocument(pmdOutput);
