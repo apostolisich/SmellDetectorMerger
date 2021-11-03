@@ -204,7 +204,7 @@
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=additions">
+            locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=additions">
          <menu
                id="SmellDetectorMerger.menus.findSmellsMenu"
                label="SmellDetectorMerger"

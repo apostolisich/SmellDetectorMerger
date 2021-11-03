@@ -12,6 +12,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
@@ -38,12 +39,12 @@ public class SmellDetectionManager {
 	
 	private SmellType smellTypeToBeDetected;
 	private Bundle bundle;
-	private IProject selectedProject;
+	private JavaProject selectedProject;
 	private List<SmellDetector> smellDetectors;
 	private Map<SmellType, Set<Smell>> detectedSmells;
 	private ScopedPreferenceStore scopedPreferenceStore;
 	
-	public SmellDetectionManager(SmellType smellType, IProject selectedProject) {
+	public SmellDetectionManager(SmellType smellType, JavaProject selectedProject) {
 		this.smellTypeToBeDetected = smellType;
 		this.selectedProject = selectedProject;
 		this.bundle = Activator.getDefault().getBundle();
@@ -52,29 +53,30 @@ public class SmellDetectionManager {
 	}
 	
 	private void initialiseSmellDetectors() {
-		IJavaProject javaProject = JavaCore.create(selectedProject);
+		IProject iProject = selectedProject.getProject();
+		IJavaProject iJavaProject = JavaCore.create(iProject);
 		
 		smellDetectors = new ArrayList<>(5);
 		if(scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes")) {
-			smellDetectors.add(new PMDSmellDetector(bundle, javaProject));
-			smellDetectors.add(new CheckStyleSmellDetector(bundle, javaProject));
-			smellDetectors.add(new DuDeSmellDetector(bundle, javaProject));
-			smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
-			smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
-			smellDetectors.add(new OrganicSmellDetector(javaProject));
+			smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
+			smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
+			smellDetectors.add(new DuDeSmellDetector(bundle, iJavaProject));
+			smellDetectors.add(new JSpIRITSmellDetector(iProject, iJavaProject));
+			smellDetectors.add(new JDeodorantSmellDetector(bundle, iJavaProject));
+			smellDetectors.add(new OrganicSmellDetector(iJavaProject));
 		} else {
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
-				smellDetectors.add(new PMDSmellDetector(bundle, javaProject));
+				smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED))
-				smellDetectors.add(new CheckStyleSmellDetector(bundle, javaProject));
+				smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED))
-				smellDetectors.add(new DuDeSmellDetector(bundle, javaProject));
+				smellDetectors.add(new DuDeSmellDetector(bundle, iJavaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED))
-				smellDetectors.add(new JSpIRITSmellDetector(selectedProject, javaProject));
+				smellDetectors.add(new JSpIRITSmellDetector(iProject, iJavaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
-				smellDetectors.add(new JDeodorantSmellDetector(bundle, javaProject));
+				smellDetectors.add(new JDeodorantSmellDetector(bundle, iJavaProject));
 			if(scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED))
-				smellDetectors.add(new OrganicSmellDetector(javaProject));
+				smellDetectors.add(new OrganicSmellDetector(iJavaProject));
 		}
 	}
 	

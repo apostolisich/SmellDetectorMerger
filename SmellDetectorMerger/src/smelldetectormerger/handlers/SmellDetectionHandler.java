@@ -3,9 +3,9 @@ package smelldetectormerger.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.ui.PlatformUI;
 
 import smelldetectormerger.detectionmanager.SmellDetectionManager;
@@ -16,7 +16,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IProject selectedProject = getSelectedProject(event);
+		JavaProject selectedProject = getSelectedProject(event);
 		if(selectedProject == null)
 			return null;
 		
@@ -41,12 +41,12 @@ public class SmellDetectionHandler extends AbstractHandler {
 	 * @return the project selected by the user for smell detection
 	 * @throws ExecutionException
 	 */
-	private IProject getSelectedProject(ExecutionEvent event) throws ExecutionException {
+	private JavaProject getSelectedProject(ExecutionEvent event) throws ExecutionException {
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection();
 		
-		IProject selectedProject = null;
+		JavaProject selectedProject = null;
 		try {
-			selectedProject = (IProject) (((StructuredSelection) selection).getFirstElement());
+			selectedProject = (JavaProject) ((TreeSelection) selection).getFirstElement();
 		} catch(ClassCastException ex) {
 			Utils.openErrorMessageDialog("Please right click on the project's root folder and try again...");
 			return null;
