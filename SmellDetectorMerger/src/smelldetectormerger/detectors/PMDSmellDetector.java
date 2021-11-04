@@ -76,10 +76,7 @@ public class PMDSmellDetector extends SmellDetector {
 	private void detectCPDDuplicates(Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		File cpdBatFile = Utils.createFile(bundle, "pmd-bin-6.37.0/bin/cpd.bat");
 		
-		String cpdDirectory = cpdBatFile.getAbsolutePath().toString();
-		cpdDirectory = cpdDirectory.substring(0, cpdDirectory.lastIndexOf("\\") + 1);
-		
-		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), cpdDirectory, true);
+		String cpdOutput = Utils.runCommand(buildDuplicateCodeToolCommand(cpdBatFile), null, true);
 		Document cpdXmlDoc = Utils.getXmlDocument(cpdOutput);
 		
 		extractDuplicates(cpdXmlDoc, detectedSmells);
@@ -236,8 +233,8 @@ public class PMDSmellDetector extends SmellDetector {
 		List<String> mainToolCmdList = new ArrayList<String>();
 		
 		try {
-//			mainToolCmdList.add("cmd");
-//			mainToolCmdList.add("/c");
+			mainToolCmdList.add("cmd");
+			mainToolCmdList.add("/c");
 			mainToolCmdList.add(mainToolBatFile.getAbsolutePath());
 			mainToolCmdList.add("-d");
 			mainToolCmdList.add(javaProject.getCorrespondingResource().getLocation().toString());
