@@ -93,7 +93,7 @@ public abstract class Utils {
 				return null;
 			}
 				
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()), 1);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 					
 			String line;
 			while((line = reader.readLine()) != null) {
