@@ -59,8 +59,8 @@ public class DuDeSmellDetector extends SmellDetector {
 		Utils.runCommand(buildToolCommand(dudeJarFile, dudeConfigFile), dudeDirectory, false);
 		
 		for(int i = 0; i < 3; i++) {
-			File resultsFile = Utils.createFile(bundle, String.format("dude/Result%d.xml", i));
-			if(resultsFile == null)
+			File resultsFile = new File(String.format(dudeDirectory + "Result%d.xml", i));
+			if(!resultsFile.exists())
 				continue;
 			
 			Document xmlDoc = Utils.getXmlDocument(resultsFile);
