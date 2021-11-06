@@ -115,7 +115,7 @@ public class OrganicSmellDetector extends SmellDetector {
 				Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
 						Utils.createSmellObject(detectedSmellType, className, targetIFile, startingLine));
 			} else {
-				String methodName = Utils.extractMethodNameFromFile(targetIFile, startingLine);
+				String methodName = (String) Utils.extractMethodNameAndCorrectLineFromFile(targetIFile, startingLine)[0];
 				Utils.addSmell(detectedSmellType, detectedSmells, getDetectorName(),
 						Utils.createSmellObject(detectedSmellType, className, methodName, targetIFile, startingLine));
 			}

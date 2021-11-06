@@ -81,7 +81,11 @@ public class Smell {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(className, duplicationGroupId, endLine, methodName, smellType, startLine);
+		if(smellType == SmellType.DUPLICATE_CODE) {
+			return Objects.hash(smellType, className, methodName, startLine, endLine);
+		}
+		
+		return Objects.hash(smellType, className, methodName);
 	}
 
 	@Override
@@ -93,9 +97,18 @@ public class Smell {
 		if (getClass() != obj.getClass())
 			return false;
 		Smell other = (Smell) obj;
-		return Objects.equals(className, other.className) /*&& duplicationGroupId == other.duplicationGroupId*/
-				&& endLine == other.endLine && Objects.equals(methodName, other.methodName)
-				&& smellType == other.smellType && startLine == other.startLine;
+		
+		if(smellType == SmellType.DUPLICATE_CODE && other.smellType == SmellType.DUPLICATE_CODE) {
+			return smellType == other.smellType
+					&& Objects.equals(className, other.className)
+					&& Objects.equals(methodName, other.methodName)
+					&& startLine == other.startLine
+					&& endLine == other.endLine;
+		}
+		
+		return smellType == other.smellType
+				&& Objects.equals(className, other.className)
+				&& Objects.equals(methodName, other.methodName);
 	}
 
 

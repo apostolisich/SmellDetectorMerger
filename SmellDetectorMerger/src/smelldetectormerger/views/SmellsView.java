@@ -167,6 +167,9 @@ public class SmellsView extends ViewPart {
 			IDocumentProvider provider = new TextFileDocumentProvider();
 			provider.connect(targetIFile);
 			
+			if(endLine == 0)
+				startLine = (int) Utils.extractMethodNameAndCorrectLineFromFile(targetIFile, startLine)[1];
+			
 			IMarker marker = targetIFile.createMarker(IMarker.TEXT);
 			marker.setAttribute(IMarker.CHAR_START, provider.getDocument(targetIFile).getLineOffset(startLine - 1));
 			if(endLine > 0)

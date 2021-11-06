@@ -278,10 +278,10 @@ public abstract class Utils {
 	 * 
 	 * @param targetFile the {@code IFile} that will be parsed
 	 * @param methodLine the line in which the method is declared
-	 * @return the name of the method in the given line of the given file
+	 * @return the name of the method and its correct line from the given file
 	 * @throws Exception
 	 */
-	public static String extractMethodNameFromFile(IFile targetFile, int methodLine) throws Exception {
+	public static Object[] extractMethodNameAndCorrectLineFromFile(IFile targetFile, int methodLine) throws Exception {
 		try(BufferedReader reader = new BufferedReader(new InputStreamReader(targetFile.getContents()))) {
 			int lineCounter = 1;
 			String line;
@@ -299,7 +299,7 @@ public abstract class Utils {
 			
 			line = line.substring(0, line.indexOf('('));
 			
-			return line.substring(line.lastIndexOf(" ") + 1);
+			return new Object[] { line.substring(line.lastIndexOf(" ") + 1), lineCounter };
 		} catch (IOException | CoreException e) {
 			throw e;
 		}

@@ -138,7 +138,7 @@ public class CheckStyleSmellDetector extends SmellDetector {
 				} else {
 					String methodName = "";
 					if(detectedSmellType == SmellType.LONG_PARAMETER_LIST) {
-						methodName = Utils.extractMethodNameFromFile(targetFile, startLine);
+						methodName = (String) Utils.extractMethodNameAndCorrectLineFromFile(targetFile, startLine)[0];
 					} else {
 						String message = errorNode.getAttributes().getNamedItem("message").getNodeValue().replace("Method ", "");
 						methodName = message.substring(0, message.indexOf(" "));
