@@ -93,6 +93,10 @@ public class SmellDetectionManager {
 					progressMonitor.beginTask("Detecting code smells...", smellDetectors.size());
 					
 					for(SmellDetector detector: smellDetectors) {
+						if(progressMonitor.isCanceled()) {
+							break;
+						}
+							
 						if(smellTypeToBeDetected == SmellType.ALL_SMELLS || detector.getSupportedSmellTypes().contains(smellTypeToBeDetected)) {
 							try {
 								detector.findSmells(smellTypeToBeDetected, detectedSmells);
@@ -102,6 +106,7 @@ public class SmellDetectionManager {
 						}
 						progressMonitor.worked(1);
 					}
+					
 					progressMonitor.done();
 				}
 			});
