@@ -33,3 +33,16 @@ In case the user is interested in getting results from a limited number of detec
 * Message Chain _(Organic)_
 * Speculative Generality _(Organic)_
 * Spaghetti Code _(Organic)_
+
+### Installation
+In order to install the tool in Eclipse, follow the steps below:
+1. Download the jar file of the tool from the latest release
+2. Close Eclipse (in case there is an instance open)
+3. Copy the downloaded jar file and paste it in the _dropins_ folder (it is located in the installation directory of Eclipse)
+4. Open Eclipse and select _File -> Restart_ from the menu to make sure it's refreshed
+
+After completing the previous steps, the tool can run by right-clicking the root folder of the desired project and selecting _SmellDetectorMerger_ followed by the desired smell to be detected.
+
+The tool also offers the option to specify which detectors will be used for the detection (all are used by default). After the tool is installed as mentioned previously, an extra Preference Page should appear in _Window -> Preferences_ as shown below:
+
+![image](https://user-images.githubusercontent.com/22786832/140609616-fbca5c35-730c-45b2-87db-cc992ab32a8f.png)
