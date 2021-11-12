@@ -111,7 +111,7 @@ public class SmellDetectionManager {
 				}
 			});
 		} catch (InvocationTargetException | InterruptedException e1) {
-			Utils.openErrorMessageDialog("An unexpected error occured. Please try again...");
+			Utils.openNewMessageDialog("An unexpected error occured. Please try again...");
 		}
 	}
 	
@@ -121,12 +121,16 @@ public class SmellDetectionManager {
 	 */
 	public void displayDetectedSmells() {
 		try {
-			SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-					getActivePage().showView("smelldetectormerger.views.SmellsView");
-			
-			smellsView.addDetectedSmells(detectedSmells);
+			if(detectedSmells.isEmpty()) {
+				Utils.openNewMessageDialog("No smells were detected for the selected project...");
+			} else {
+				SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+						getActivePage().showView("smelldetectormerger.views.SmellsView");
+				
+				smellsView.addDetectedSmells(detectedSmells);
+			}
 		} catch (PartInitException e1) {
-			Utils.openErrorMessageDialog("An unexpected error occurred during the display of the detected smells. Please try again...");
+			Utils.openNewMessageDialog("An unexpected error occurred during the display of the detected smells. Please try again...");
 		}
 	}
 

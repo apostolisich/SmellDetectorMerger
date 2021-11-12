@@ -181,7 +181,7 @@ public class SmellsView extends ViewPart {
 			IDE.openEditor(page, marker);
 			marker.delete();
 		} catch(Exception e) {
-			Utils.openErrorMessageDialog("An error occured while trying to display the selected smell. Pleast try again...");
+			Utils.openNewMessageDialog("An error occured while trying to display the selected smell. Pleast try again...");
 		}
 	}
 	

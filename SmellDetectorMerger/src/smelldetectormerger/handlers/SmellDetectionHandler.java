@@ -22,7 +22,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		
 		SmellType selectedSmellType = Utils.getSmellTypeFromName(event);
 		if(selectedSmellType == null) {
-			Utils.openErrorMessageDialog("Unexpected smell type has been selected. Please try again...");
+			Utils.openNewMessageDialog("Unexpected smell type has been selected. Please try again...");
 			return null;
 		}
 		
@@ -48,7 +48,7 @@ public class SmellDetectionHandler extends AbstractHandler {
 		try {
 			selectedProject = (JavaProject) ((TreeSelection) selection).getFirstElement();
 		} catch(ClassCastException ex) {
-			Utils.openErrorMessageDialog("Please right click on the project's root folder and try again...");
+			Utils.openNewMessageDialog("Please right click on the project's root folder and try again...");
 			return null;
 		}
 		

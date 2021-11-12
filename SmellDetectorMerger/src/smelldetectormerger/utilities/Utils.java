@@ -391,11 +391,11 @@ public abstract class Utils {
 	}
 	
 	/**
-	 * Opens a new message dialog with the given error message.
+	 * Opens a new message dialog with the given message.
 	 * 
-	 * @param message the error message to be displayed
+	 * @param message the message to be displayed
 	 */
-	public static void openErrorMessageDialog(String message) {
+	public static void openNewMessageDialog(String message) {
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		MessageDialog.openInformation(
 				window.getShell(),
