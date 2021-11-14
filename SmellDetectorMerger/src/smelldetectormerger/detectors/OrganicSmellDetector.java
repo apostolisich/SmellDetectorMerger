@@ -79,7 +79,7 @@ public class OrganicSmellDetector extends SmellDetector {
 	@Override
 	public void findSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		Organic organicPlugin = new Organic();
-		String sourcePath = javaProject.getCorrespondingResource().getLocation().toString() + "/src/";
+		String sourcePath = javaProject.getCorrespondingResource().getLocation().toString();
 		
 		List<Type> classTypeDeclarations = organicPlugin.loadAllTypes(Collections.singletonList(sourcePath));
 		organicPlugin.collectTypeMetrics(classTypeDeclarations);

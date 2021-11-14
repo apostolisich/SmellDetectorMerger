@@ -10,7 +10,7 @@
       </category>
       <command
             categoryId="SmellDetectorMerger.commands.category"
-            name="All smells"
+            name="All Smells"
             id="SmellDetectorMerger.commands.findAllSmellsCommand">
       </command>
       <command
