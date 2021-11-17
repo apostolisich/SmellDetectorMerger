@@ -47,12 +47,14 @@ public class SmellDetectionManager {
 	public SmellDetectionManager(SmellType smellType, JavaProject selectedProject) {
 		this.smellTypeToBeDetected = smellType;
 		this.selectedProject = selectedProject;
-		this.bundle = Activator.getDefault().getBundle();
-		scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "SmellDetectorMerger");
-		initialiseSmellDetectors();
+		initialiseNecessaryClassFields();
 	}
 	
-	private void initialiseSmellDetectors() {
+	private void initialiseNecessaryClassFields() {
+		bundle = Activator.getDefault().getBundle();
+		scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "SmellDetectorMerger");
+		detectedSmells = new HashMap<>();
+		
 		IProject iProject = selectedProject.getProject();
 		IJavaProject iJavaProject = JavaCore.create(iProject);
 		
@@ -81,8 +83,6 @@ public class SmellDetectionManager {
 	}
 	
 	public void detectCodeSmells() {
-		detectedSmells = new HashMap<>();
-		
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IProgressService ps = wb.getProgressService();
 		
@@ -93,18 +93,9 @@ public class SmellDetectionManager {
 					progressMonitor.beginTask("Detecting code smells...", smellDetectors.size());
 					
 					for(SmellDetector detector: smellDetectors) {
-						if(progressMonitor.isCanceled()) {
-							break;
-						}
-							
 						if(smellTypeToBeDetected == SmellType.ALL_SMELLS || detector.getSupportedSmellTypes().contains(smellTypeToBeDetected)) {
-							try {
-								detector.findSmells(smellTypeToBeDetected, detectedSmells);
-							} catch (Exception e) {
-								//Ignore if an error is thrown. The flow should continue with the rest of the tools.
-							}
+							executeDetector(detector, progressMonitor);
 						}
-						progressMonitor.worked(1);
 					}
 					
 					progressMonitor.done();
@@ -116,13 +107,35 @@ public class SmellDetectionManager {
 	}
 	
 	/**
+	 * Executes the smell detection for the given detector and updates the progress
+	 * in the progress bar after the detection is finished.
+	 * 
+	 * @param detector the smell detector that will check for smells
+	 * @param progressMonitor a progress bar dialog that reports the progress of detection
+	 */
+	private void executeDetector(SmellDetector detector, IProgressMonitor progressMonitor) {
+			if(progressMonitor.isCanceled()) {
+				return;
+			}
+			
+			try {
+				progressMonitor.subTask("Current Detector: " + detector.getDetectorName());
+				detector.findSmells(smellTypeToBeDetected, detectedSmells);
+			} catch (Exception e) {
+				//Ignore if an error is thrown. The flow should continue with the rest of the tools.
+			}
+			
+			progressMonitor.worked(1);
+	}
+	
+	/**
 	 * Adds the smells view to the workbench and then fills the view with the detected
 	 * smells data.
 	 */
 	public void displayDetectedSmells() {
 		try {
 			if(detectedSmells.isEmpty()) {
-				Utils.openNewMessageDialog("No smells were detected for the selected project...");
+				Utils.openNewMessageDialog("No smells were detected for the selected project!");
 			} else {
 				SmellsView smellsView = (SmellsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 						getActivePage().showView("smelldetectormerger.views.SmellsView");
