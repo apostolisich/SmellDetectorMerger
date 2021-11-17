@@ -43,8 +43,8 @@ public class Smell {
 		}
 	}
 	
-	public String getSmellTypeName() {
-		return smellType.getName();
+	public SmellType getSmellType() {
+		return smellType;
 	}
 	
 	public IFile getTargetIFile() {

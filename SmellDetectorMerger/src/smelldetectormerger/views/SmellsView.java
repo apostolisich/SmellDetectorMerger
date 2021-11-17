@@ -70,7 +70,7 @@ public class SmellsView extends ViewPart {
 			@Override
 			public String getText(Object element) {
 				Smell smell = (Smell) element;
-				return smell.getSmellTypeName();
+				return smell.getSmellType().getName();
 			}
 		});
 		smellTypeColumn.getColumn().addListener(SWT.Selection, COLUMN_SORT_LISTENER);
@@ -138,10 +138,10 @@ public class SmellsView extends ViewPart {
 			public void run() {
 				IStructuredSelection currentSelection = (IStructuredSelection) tableViewer.getStructuredSelection();
 				Smell codeSmell = (Smell) currentSelection.getFirstElement();
-				if(codeSmell.getSmellTypeName().equals("Duplicate Code")) {
-					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), codeSmell.getTargetEndLine());
+				if(codeSmell.getSmellType().equals(SmellType.DUPLICATE_CODE)) {
+					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), codeSmell.getTargetEndLine(), null);
 				} else {
-					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), 0);
+					openFile(codeSmell.getTargetIFile(), codeSmell.getTargetStartLine(), 0, codeSmell.getSmellType());
 				}
 			}
 		};
@@ -161,13 +161,14 @@ public class SmellsView extends ViewPart {
 	 * @param targetFile the file to be opened (a java class)
 	 * @param startLine the starting line of the element that contains the smell
 	 * @param endLine the ending line of the element that contains the smell
+	 * @param smellType the smell type that will be displayed in the given file
 	 */
-	private void openFile(IFile targetIFile, int startLine, int endLine) {
+	private void openFile(IFile targetIFile, int startLine, int endLine, SmellType smellType) {
 		try {
 			IDocumentProvider provider = new TextFileDocumentProvider();
 			provider.connect(targetIFile);
 			
-			if(endLine == 0)
+			if(endLine == 0 && !Utils.isClassSmell(smellType))
 				startLine = (int) Utils.extractMethodNameAndCorrectLineFromFile(targetIFile, startLine)[1];
 			
 			IMarker marker = targetIFile.createMarker(IMarker.TEXT);
@@ -211,7 +212,7 @@ public class SmellsView extends ViewPart {
 	private final Comparator<Smell> SMELL_NAME_COMPARATOR = new Comparator<Smell> () {
 		@Override
 		public int compare(Smell o1, Smell o2) {
-			int result = o1.getSmellTypeName().toLowerCase().compareTo(o2.getSmellTypeName().toLowerCase());
+			int result = o1.getSmellType().getName().toLowerCase().compareTo(o2.getSmellType().getName().toLowerCase());
 			//Hack to avoid deleting elements in case they are equal with those already in the set.
 			return result == 0 ? -1 : result;
 		}
