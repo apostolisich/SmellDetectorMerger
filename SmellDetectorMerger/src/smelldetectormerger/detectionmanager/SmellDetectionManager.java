@@ -58,7 +58,7 @@ public class SmellDetectionManager {
 		IProject iProject = selectedProject.getProject();
 		IJavaProject iJavaProject = JavaCore.create(iProject);
 		
-		smellDetectors = new ArrayList<>(5);
+		smellDetectors = new ArrayList<>(6);
 		if(scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes")) {
 			smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
 			smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
