@@ -73,37 +73,25 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(organic);
 		
 		if(scopedPreferences.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes"))
-			disableDetectorsSelectionGroup();
+			toggleDetectorsSelectionAvailability(true);
 	}
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
 		if(event.getProperty().equals(FieldEditor.VALUE)) {
-			if(smellDetectorsRadio.getSelectionValue().equals("yes")) {
-				disableDetectorsSelectionGroup();
-			} else {
-				enableDetectorsSelectionGroup();
-			}
+			boolean useAllDetectors = smellDetectorsRadio.getSelectionValue().equals("yes");
+			toggleDetectorsSelectionAvailability(useAllDetectors);
 		}
 	}
 	
-	private void disableDetectorsSelectionGroup() {
-		checkStyle.setEnabled(false, smellDetectorsGroup);
-		dude.setEnabled(false, smellDetectorsGroup);
-		jDeodorant.setEnabled(false, smellDetectorsGroup);
-		jSpirit.setEnabled(false, smellDetectorsGroup);
-		pmd.setEnabled(false, smellDetectorsGroup);
-		organic.setEnabled(false, smellDetectorsGroup);
-	}
-	
-	private void enableDetectorsSelectionGroup() {
-		checkStyle.setEnabled(true, smellDetectorsGroup);
-		dude.setEnabled(true, smellDetectorsGroup);
-		jDeodorant.setEnabled(true, smellDetectorsGroup);
-		jSpirit.setEnabled(true, smellDetectorsGroup);
-		pmd.setEnabled(true, smellDetectorsGroup);
-		organic.setEnabled(true, smellDetectorsGroup);
+	private void toggleDetectorsSelectionAvailability(boolean useAllDetectors) {
+		checkStyle.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
+		dude.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
+		jDeodorant.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
+		jSpirit.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
+		pmd.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
+		organic.setEnabled(useAllDetectors ? false : true, smellDetectorsGroup);
 	}
 
 }

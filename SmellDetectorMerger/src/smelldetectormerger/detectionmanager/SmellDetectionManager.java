@@ -59,27 +59,19 @@ public class SmellDetectionManager {
 		IJavaProject iJavaProject = JavaCore.create(iProject);
 		
 		smellDetectors = new ArrayList<>(6);
-		if(scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes")) {
+		boolean useAllDetectors = scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes");
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
 			smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED))
 			smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED))
 			smellDetectors.add(new DuDeSmellDetector(bundle, iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED))
 			smellDetectors.add(new JSpIRITSmellDetector(iProject, iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
 			smellDetectors.add(new JDeodorantSmellDetector(bundle, iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED))
 			smellDetectors.add(new OrganicSmellDetector(iJavaProject));
-		} else {
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
-				smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED))
-				smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED))
-				smellDetectors.add(new DuDeSmellDetector(bundle, iJavaProject));
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED))
-				smellDetectors.add(new JSpIRITSmellDetector(iProject, iJavaProject));
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
-				smellDetectors.add(new JDeodorantSmellDetector(bundle, iJavaProject));
-			if(scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED))
-				smellDetectors.add(new OrganicSmellDetector(iJavaProject));
-		}
 	}
 	
 	public void detectCodeSmells() {
