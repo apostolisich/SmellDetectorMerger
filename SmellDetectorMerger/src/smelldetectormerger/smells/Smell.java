@@ -35,7 +35,7 @@ public class Smell {
 	
 	public String getAffectedElementName() {
 		if(smellType == SmellType.DUPLICATE_CODE) {
-			return String.format("Group %d, %s - Start: %s - End: %s", duplicationGroupId, className, startLine, endLine);
+			return String.format("Group %d %s - Start: %s - End: %s", duplicationGroupId, className, startLine, endLine);
 		} else if(Utils.isClassSmell(smellType)) {
 			return className;
 		} else {

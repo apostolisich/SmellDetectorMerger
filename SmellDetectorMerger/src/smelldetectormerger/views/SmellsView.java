@@ -1,5 +1,11 @@
 package smelldetectormerger.views;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -22,6 +28,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
@@ -41,6 +49,7 @@ public class SmellsView extends ViewPart {
 	private TableViewerColumn smellTypeColumn;
 	private TableViewerColumn affectedElementColumn;
 	private TableViewerColumn detectedToolCounterColumn;
+	private Action exportResultsAction;
 		
 	@Override
 	public void createPartControl(Composite parent) {
@@ -53,6 +62,7 @@ public class SmellsView extends ViewPart {
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
 		setDoubleClickAction();
+		setExportResultsAction();
 		getSite().setSelectionProvider(tableViewer);
 	}
 
@@ -126,6 +136,9 @@ public class SmellsView extends ViewPart {
 			fullSetOfSmells.addAll(v);
 		});
 		tableViewer.setInput(fullSetOfSmells);
+		
+		if(fullSetOfSmells.size() > 0)
+			exportResultsAction.setEnabled(true);
 	}
 	
 	/**
@@ -184,6 +197,40 @@ public class SmellsView extends ViewPart {
 		} catch(Exception e) {
 			Utils.openNewMessageDialog("An error occured while trying to display the selected smell. Please try again...");
 		}
+	}
+	
+	/**
+	 * Creates an export action in order to save the results of the detection in a csv file.
+	 */
+	private void setExportResultsAction() {
+		exportResultsAction = new Action() {
+			@Override
+			public void run() {
+				String path = System.getProperty("user.dir");
+				File exportFile = new File(path + "\\exported-results-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm")) + ".csv");
+				
+				try(BufferedWriter fileWriter = new BufferedWriter(new FileWriter(exportFile))) {
+					Set<Smell> detectedSmells = (Set<Smell>) tableViewer.getInput();
+					for(Smell smell: detectedSmells) {
+						fileWriter.write(smell.getSmellType().getName());
+						fileWriter.write(',');
+						fileWriter.write(smell.getAffectedElementName());
+						fileWriter.write(',');
+						fileWriter.write(smell.getDetectorNames());
+						fileWriter.write('\n');
+					}
+				} catch (IOException e) {
+					Utils.openNewMessageDialog("An error occured while exporting the results. Please try again...");
+				}
+				
+				Utils.openNewMessageDialog("Results saved in " + exportFile.getAbsolutePath());
+			}
+		};
+		
+		exportResultsAction.setToolTipText("Export Results");
+		exportResultsAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		exportResultsAction.setEnabled(false);
+		getViewSite().getActionBars().getToolBarManager().add(exportResultsAction);
 	}
 	
 	private final Listener COLUMN_SORT_LISTENER = new Listener() {
