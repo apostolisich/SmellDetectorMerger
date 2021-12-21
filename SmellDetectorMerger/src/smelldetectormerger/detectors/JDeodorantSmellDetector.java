@@ -15,8 +15,11 @@ import org.osgi.framework.Bundle;
 import gr.uom.java.ast.util.TopicFinder;
 import gr.uom.java.distance.CandidateRefactoring;
 import gr.uom.java.distance.ExtractClassCandidateGroup;
+import gr.uom.java.distance.ExtractClassCandidateRefactoring;
 import gr.uom.java.distance.MoveMethodCandidateRefactoring;
+import gr.uom.java.jdeodorant.refactoring.manipulators.ASTSlice;
 import gr.uom.java.jdeodorant.refactoring.manipulators.ASTSliceGroup;
+import gr.uom.java.jdeodorant.refactoring.manipulators.TypeCheckElimination;
 import gr.uom.java.jdeodorant.refactoring.manipulators.TypeCheckEliminationGroup;
 import gr.uom.java.jdeodorant.refactoring.views.FeatureEnvy;
 import gr.uom.java.jdeodorant.refactoring.views.GodClass;
@@ -77,22 +80,19 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		ExtractClassCandidateGroup[] godClassSmells = godClass.getTable();
 		
 		for(ExtractClassCandidateGroup group: godClassSmells) {
-			group.getCandidates().forEach( candidate -> {
-				String source = candidate.getSource();
-				String className = source.substring(source.lastIndexOf('.') + 1);
-				IFile targetIFile = candidate.getSourceIFile();
-				
-				IJavaElement javaElement = candidate.getSourceClassTypeDeclaration().resolveBinding().getJavaElement();
-				ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceClassTypeDeclaration().getStartPosition());
-				
-				try {
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(smellType, className, targetIFile, startLine));
-				} catch (Exception e) {
-					//Ignore
-				}
-			});
+			//All candidates in a group refer to the same smell, so we only get the first one here
+			ExtractClassCandidateRefactoring candidate = group.getCandidates().get(0);
+			
+			String source = candidate.getSource();
+			String className = source.substring(source.lastIndexOf('.') + 1);
+			IFile targetIFile = candidate.getSourceIFile();
+			
+			IJavaElement javaElement = candidate.getSourceClassTypeDeclaration().resolveBinding().getJavaElement();
+			ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+			int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceClassTypeDeclaration().getStartPosition());
+			
+			Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+					Utils.createSmellObject(smellType, className, targetIFile, startLine));
 		}
 	}
 	
@@ -102,22 +102,19 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		ASTSliceGroup[] longMethods = longMethod.getTable();
 		
 		for(ASTSliceGroup group: longMethods) {
-			group.getCandidates().forEach( candidate -> {
-				String className = candidate.getSourceTypeDeclaration().getName().getIdentifier();
-				String methodName = candidate.getSourceMethodDeclaration().getName().getIdentifier();
-				IFile targetIFile = candidate.getIFile();
+			//All candidates in a group refer to the same smell, so we only get the first one here
+			ASTSlice candidate = group.getCandidates().iterator().next();
 				
-				IJavaElement javaElement = candidate.getSourceMethodDeclaration().resolveBinding().getJavaElement();
-				ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-				int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceMethodDeclaration().getStartPosition());
-				
-				try {
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
-				} catch (Exception e) {
-					//Ignore
-				}
-			});
+			String className = candidate.getSourceTypeDeclaration().getName().getIdentifier();
+			String methodName = candidate.getSourceMethodDeclaration().getName().getIdentifier();
+			IFile targetIFile = candidate.getIFile();
+			
+			IJavaElement javaElement = candidate.getSourceMethodDeclaration().resolveBinding().getJavaElement();
+			ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+			int startLine = Utils.getLineNumFromOffset(cu, candidate.getSourceMethodDeclaration().getStartPosition());
+			
+			Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+					Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
 		}
 	}
 	
@@ -144,28 +141,25 @@ public class JDeodorantSmellDetector extends SmellDetector {
 		}
 	}
 	
-	private void extractTypeCheckingSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) {
+	private void extractTypeCheckingSmells(SmellType smellType, Map<SmellType, Set<Smell>> detectedSmells) throws Exception {
 		TypeChecking typeChecking = new TypeChecking();
 		typeChecking.setActiveProject(javaProject);
 		TypeCheckEliminationGroup[] typeCheckingSmells = typeChecking.getTable();
 		
 		for(TypeCheckEliminationGroup group: typeCheckingSmells) {
-			group.getCandidates().forEach( candidate -> {
-				String className = candidate.getTypeCheckClass().getName().getIdentifier();
-				String methodName = candidate.getTypeCheckMethod().getName().getIdentifier();
-				IFile targetIFile = candidate.getTypeCheckIFile();
-				
-				IJavaElement javaElement = candidate.getTypeCheckClass().resolveBinding().getJavaElement();
-				ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
-				int startLine = Utils.getLineNumFromOffset(cu, candidate.getTypeCheckMethod().getStartPosition());
-				
-				try {
-					Utils.addSmell(smellType, detectedSmells, getDetectorName(),
-							Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
-				} catch (Exception e) {
-					//Ignore
-				}
-			});
+			//All candidates in a group refer to the same smell, so we only get the first one here
+			TypeCheckElimination candidate = group.getCandidates().get(0);
+			
+			String className = candidate.getTypeCheckClass().getName().getIdentifier();
+			String methodName = candidate.getTypeCheckMethod().getName().getIdentifier();
+			IFile targetIFile = candidate.getTypeCheckIFile();
+			
+			IJavaElement javaElement = candidate.getTypeCheckClass().resolveBinding().getJavaElement();
+			ICompilationUnit cu = (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+			int startLine = Utils.getLineNumFromOffset(cu, candidate.getTypeCheckMethod().getStartPosition());
+			
+			Utils.addSmell(smellType, detectedSmells, getDetectorName(),
+					Utils.createSmellObject(smellType, className, methodName, targetIFile, startLine));
 		}
 	}
 	
