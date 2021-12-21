@@ -38,6 +38,7 @@ public class OrganicSmellDetector extends SmellDetector {
 												 SmellType.MESSAGE_CHAIN,
 												 SmellType.REFUSED_PARENT_BEQUEST,
 												 SmellType.SPECULATIVE_GENERALITY,
+												 SmellType.SPAGHETTI_CODE,
 												 SmellType.DISPERSED_COUPLING,
 												 SmellType.INTENSIVE_COUPLING,
 												 SmellType.BRAIN_CLASS,
