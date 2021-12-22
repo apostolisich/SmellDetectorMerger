@@ -3,6 +3,7 @@ package smelldetectormerger.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeSelection;
@@ -20,14 +21,14 @@ public class SmellDetectionHandler extends AbstractHandler {
 		if(selectedProject == null)
 			return null;
 		
-		SmellType selectedSmellType = Utils.getSmellTypeFromName(event);
+		SmellType selectedSmellType = getSelectedSmellType(event);
 		if(selectedSmellType == null) {
 			Utils.openNewMessageDialog("Unexpected smell type has been selected. Please try again...");
 			return null;
 		}
 		
 		SmellDetectionManager smellDetectionManager = new SmellDetectionManager(selectedSmellType, selectedProject);
-		smellDetectionManager.detectCodeSmells();
+		smellDetectionManager.extractCodeSmells();
 		smellDetectionManager.displayDetectedSmells();
 
 		return null;
@@ -48,11 +49,29 @@ public class SmellDetectionHandler extends AbstractHandler {
 		try {
 			selectedProject = (JavaProject) ((TreeSelection) selection).getFirstElement();
 		} catch(ClassCastException ex) {
-			Utils.openNewMessageDialog("Please right click on the project's root folder and try again...");
+			Utils.openNewMessageDialog("Please right click on the root folder of a Java project and try again...");
 			return null;
 		}
 		
 		return selectedProject;
+	}
+	
+	/**
+	 * Extracts and returns the {@code SmellType} based on the selected option by the user.
+	 * 
+	 * @param event the event that triggered the tool
+	 * @return the {@code SmellType} selected by the user
+	 */
+	private SmellType getSelectedSmellType(ExecutionEvent event) {
+		try {
+			String smellName = event.getCommand().getName();
+			SmellType selectedSmellType = Utils.getSmellTypeFromName(smellName);
+			
+			return selectedSmellType;
+		} catch (NotDefinedException e) {
+			//If an error is returned, null is returned here and then a message dialog will be displayed later
+			return null;
+		}
 	}
 	
 }

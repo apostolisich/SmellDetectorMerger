@@ -71,7 +71,7 @@ public class Smell {
 		StringBuilder builder = new StringBuilder();
 		detectorNamesSet.forEach( detectorName -> {
 			if(builder.length() != 0)
-				builder.append(", ");
+				builder.append(",");
 			
 			builder.append(detectorName);
 		});

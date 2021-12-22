@@ -335,58 +335,52 @@ public abstract class Utils {
 	 * @param smellName the smellName for which to get the {@code SmellType}
 	 * @return the correct {@code SmellType}
 	 */
-	public static SmellType getSmellTypeFromName(ExecutionEvent triggeredEvent) {
-		try {
-			String smellName = triggeredEvent.getCommand().getName();
-			
-			switch(smellName) {
-				case "God Class":
-					return SmellType.GOD_CLASS;
-				case "Long Method":
-					return SmellType.LONG_METHOD;
-				case "Long Parameter List":
-					return SmellType.LONG_PARAMETER_LIST;
-				case "Feature Envy":
-					return SmellType.FEATURE_ENVY;
-				case "Duplicate Code":
-					return SmellType.DUPLICATE_CODE;
-				case "Brain Class":
-					return SmellType.BRAIN_CLASS;
-				case "Brain Method":
-					return SmellType.BRAIN_METHOD;
-				case "Data Class":
-					return SmellType.DATA_CLASS;
-				case "Dispersed Coupling":
-					return SmellType.DISPERSED_COUPLING;
-				case "Intensive Coupling":
-					return SmellType.INTENSIVE_COUPLING;
-				case "Refused Parent Bequest":
-					return SmellType.REFUSED_PARENT_BEQUEST;
-				case "Shotgun Surgery":
-					return SmellType.SHOTGUN_SURGERY;
-				case "Tradition Breaker":
-					return SmellType.TRADITION_BREAKER;
-				case "Type Checking":
-					return SmellType.TYPE_CHECKING;
-				case "Class Data Should Be Private":
-					return SmellType.CLASS_DATA_SHOULD_BE_PRIVATE;
-				case "Complex Class":
-					return SmellType.COMPLEX_CLASS;
-				case "Lazy Class":
-					return SmellType.LAZY_CLASS;
-				case "Message Chain":
-					return SmellType.MESSAGE_CHAIN;
-				case "Speculative Generality":
-					return SmellType.SPECULATIVE_GENERALITY;
-				case "Spaghetti Code":
-					return SmellType.SPAGHETTI_CODE;
-				default:
-					return SmellType.ALL_SMELLS;
-			}
-		} catch (NotDefinedException e) {
-			//If an error is returned, null is returned here and then an error dialog will be shown to the user
-			//via the SmellDetectionHandler.
-			return null;
+	public static SmellType getSmellTypeFromName(String smellName) {
+		switch(smellName) {
+			case "God Class":
+				return SmellType.GOD_CLASS;
+			case "Long Method":
+				return SmellType.LONG_METHOD;
+			case "Long Parameter List":
+				return SmellType.LONG_PARAMETER_LIST;
+			case "Feature Envy":
+				return SmellType.FEATURE_ENVY;
+			case "Duplicate Code":
+				return SmellType.DUPLICATE_CODE;
+			case "Brain Class":
+				return SmellType.BRAIN_CLASS;
+			case "Brain Method":
+				return SmellType.BRAIN_METHOD;
+			case "Data Class":
+				return SmellType.DATA_CLASS;
+			case "Dispersed Coupling":
+				return SmellType.DISPERSED_COUPLING;
+			case "Intensive Coupling":
+				return SmellType.INTENSIVE_COUPLING;
+			case "Refused Parent Bequest":
+				return SmellType.REFUSED_PARENT_BEQUEST;
+			case "Shotgun Surgery":
+				return SmellType.SHOTGUN_SURGERY;
+			case "Tradition Breaker":
+				return SmellType.TRADITION_BREAKER;
+			case "Type Checking":
+				return SmellType.TYPE_CHECKING;
+			case "Class Data Should Be Private":
+				return SmellType.CLASS_DATA_SHOULD_BE_PRIVATE;
+			case "Complex Class":
+				return SmellType.COMPLEX_CLASS;
+			case "Lazy Class":
+				return SmellType.LAZY_CLASS;
+			case "Message Chain":
+				return SmellType.MESSAGE_CHAIN;
+			case "Speculative Generality":
+				return SmellType.SPECULATIVE_GENERALITY;
+			case "Spaghetti Code":
+				return SmellType.SPAGHETTI_CODE;
+			case "Import CSV":
+				return SmellType.IMPORT_CSV;
+			default:
+				return SmellType.ALL_SMELLS;
 		}
 	}
 	

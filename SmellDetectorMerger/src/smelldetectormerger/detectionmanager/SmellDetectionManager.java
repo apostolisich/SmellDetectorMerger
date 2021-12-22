@@ -1,8 +1,13 @@
 package smelldetectormerger.detectionmanager;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +19,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -42,6 +49,7 @@ public class SmellDetectionManager {
 	private JavaProject selectedProject;
 	private List<SmellDetector> smellDetectors;
 	private Map<SmellType, Set<Smell>> detectedSmells;
+	private Map<SmellType, Integer> mapFromSmellNameToMaxToolCount;
 	private ScopedPreferenceStore scopedPreferenceStore;
 	
 	public SmellDetectionManager(SmellType smellType, JavaProject selectedProject) {
@@ -54,27 +62,113 @@ public class SmellDetectionManager {
 		bundle = Activator.getDefault().getBundle();
 		scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "SmellDetectorMerger");
 		detectedSmells = new HashMap<>();
+		mapFromSmellNameToMaxToolCount = new HashMap<>();
 		
 		IProject iProject = selectedProject.getProject();
 		IJavaProject iJavaProject = JavaCore.create(iProject);
 		
 		smellDetectors = new ArrayList<>(6);
 		boolean useAllDetectors = scopedPreferenceStore.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes");
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED))
-			smellDetectors.add(new PMDSmellDetector(bundle, iJavaProject));
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED))
-			smellDetectors.add(new CheckStyleSmellDetector(bundle, iJavaProject));
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED))
-			smellDetectors.add(new DuDeSmellDetector(bundle, iJavaProject));
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED))
-			smellDetectors.add(new JSpIRITSmellDetector(iProject, iJavaProject));
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED))
-			smellDetectors.add(new JDeodorantSmellDetector(bundle, iJavaProject));
-		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED))
-			smellDetectors.add(new OrganicSmellDetector(iJavaProject));
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.PMD_ENABLED)) {
+			PMDSmellDetector pmdDetector = new PMDSmellDetector(bundle, iJavaProject);
+			smellDetectors.add(pmdDetector);
+			updateMaxToolCountMap(pmdDetector);
+		}
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.CHECKSTYLE_ENABLED)) {
+			CheckStyleSmellDetector checkStyleDetector = new CheckStyleSmellDetector(bundle, iJavaProject);
+			smellDetectors.add(checkStyleDetector);
+			updateMaxToolCountMap(checkStyleDetector);
+		}
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.DUDE_ENABLED)) {
+			DuDeSmellDetector dudeDetector = new DuDeSmellDetector(bundle, iJavaProject);
+			smellDetectors.add(dudeDetector);
+			updateMaxToolCountMap(dudeDetector);
+		}
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JSPIRIT_ENABLED)) {
+			JSpIRITSmellDetector jspiritDetector = new JSpIRITSmellDetector(iProject, iJavaProject);
+			smellDetectors.add(jspiritDetector);
+			updateMaxToolCountMap(jspiritDetector);
+		}
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.JDEODORANT_ENABLED)) {
+			JDeodorantSmellDetector jdeodorantDetector = new JDeodorantSmellDetector(bundle, iJavaProject);
+			smellDetectors.add(jdeodorantDetector);
+			updateMaxToolCountMap(jdeodorantDetector);
+		}
+		if(useAllDetectors || scopedPreferenceStore.getBoolean(PreferenceConstants.ORGANIC_ENABLED)) {
+			OrganicSmellDetector organicDetector = new OrganicSmellDetector(iJavaProject);
+			smellDetectors.add(organicDetector);
+			updateMaxToolCountMap(organicDetector);
+		}
 	}
 	
-	public void detectCodeSmells() {
+	/**
+	 * Parses the supported smell types for the given detector and updates the max count of
+	 * the enabled tools which can detect each smell type.
+	 * 
+	 * @param detector the {@code SmellDetector} from which the smell types will be parsed
+	 */
+	private void updateMaxToolCountMap(SmellDetector detector) {
+		detector.getSupportedSmellTypes().forEach( smellType -> {
+			mapFromSmellNameToMaxToolCount.merge(smellType, 1, (oldValue, newValue) -> oldValue + newValue);
+		});
+	}
+	
+	public void extractCodeSmells() {
+		if(smellTypeToBeDetected == SmellType.IMPORT_CSV) {
+			extractCodeSmellsFromCsv();
+		} else {
+			detectCodeSmellsInSelectedProject();
+		}
+	}
+	
+	private void extractCodeSmellsFromCsv() {
+		FileDialog fileExplorerDialog = new FileDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.OPEN);
+		fileExplorerDialog.setFilterExtensions(new String[] { "*.csv" });
+		String selectedFilePath = fileExplorerDialog.open();
+		
+		try(BufferedReader reader = new BufferedReader(new FileReader(new File(selectedFilePath)))) {
+			String line;
+			while((line = reader.readLine()) != null) {
+				String[] smellData = line.split(",");
+				SmellType smellType = Utils.getSmellTypeFromName(smellData[0]);
+				String affectedElement = smellData[1];
+				
+				Smell newSmell;
+				if(smellType == SmellType.DUPLICATE_CODE) {
+					int groupId = Integer.parseInt(affectedElement.substring(6, affectedElement.indexOf(' ', 6)));
+					String className = affectedElement.substring(affectedElement.indexOf(' ', 6) + 1, affectedElement.indexOf(" -"));
+					int startLineIndex = affectedElement.indexOf("Start: ") + 7;
+					int startLine = Integer.parseInt(affectedElement.substring(startLineIndex, affectedElement.indexOf(' ', startLineIndex)));
+					int endLineIndex = affectedElement.indexOf("End: ") + 5;
+					int endLine = Integer.parseInt(affectedElement.substring(endLineIndex));
+					
+					newSmell = Utils.createSmellObject(smellType, groupId, className, null, startLine, endLine);
+				} else if(Utils.isClassSmell(smellType)) {
+					newSmell = Utils.createSmellObject(smellType, affectedElement, null, 0);
+				} else {
+					String[] affectedElementParts = affectedElement.split("\\.");
+					newSmell = Utils.createSmellObject(smellType, affectedElementParts[0], affectedElementParts[1].replace("()", ""), null, 0);
+				}
+				
+				for(int i = 2; i < smellData.length; i++) {
+					newSmell.addDetectorName(smellData[i].trim());
+				}
+				
+				if(!detectedSmells.containsKey(smellType))
+					detectedSmells.put(smellType, new LinkedHashSet<Smell>());
+				
+				detectedSmells.get(smellType).add(newSmell);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			Utils.openNewMessageDialog("An error occured while reading the csv file. Please try again...");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Utils.openNewMessageDialog("An error occured while importing data. Please try again...");
+		}
+	}
+	
+	private void detectCodeSmellsInSelectedProject() {
 		IWorkbench wb = PlatformUI.getWorkbench();
 		IProgressService ps = wb.getProgressService();
 		
@@ -133,6 +227,7 @@ public class SmellDetectionManager {
 						getActivePage().showView("smelldetectormerger.views.SmellsView");
 				
 				smellsView.addDetectedSmells(detectedSmells);
+				smellsView.setMaxToolCountMap(mapFromSmellNameToMaxToolCount);
 			}
 		} catch (PartInitException e1) {
 			Utils.openNewMessageDialog("An unexpected error occurred during the display of the detected smells. Please try again...");

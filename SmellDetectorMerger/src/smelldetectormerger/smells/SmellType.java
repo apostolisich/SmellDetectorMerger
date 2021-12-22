@@ -2,6 +2,7 @@ package smelldetectormerger.smells;
 
 public enum SmellType {
 	
+	IMPORT_CSV(""),
 	//The below is just a SmellType to represent cases that the user wants to detect all smells
 	ALL_SMELLS(""),
 	GOD_CLASS("God Class"),

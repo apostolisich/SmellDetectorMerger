@@ -11,10 +11,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -28,7 +32,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -37,6 +40,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import smelldetectormerger.Activator;
 import smelldetectormerger.smells.Smell;
 import smelldetectormerger.smells.SmellType;
 import smelldetectormerger.utilities.Utils;
@@ -50,6 +54,12 @@ public class SmellsView extends ViewPart {
 	private TableViewerColumn affectedElementColumn;
 	private TableViewerColumn detectedToolCounterColumn;
 	private Action exportResultsAction;
+	private Action twoPlusToolsFiltering;
+	private Action majorityVotingFiltering;
+	private Action undoFilteringAction;
+	private Action toolsAccuracyAction;
+	private Set<Smell> fullSetOfSmells;
+	private Map<SmellType, Integer> mapFromSmellNameToMaxToolCount;
 		
 	@Override
 	public void createPartControl(Composite parent) {
@@ -62,6 +72,10 @@ public class SmellsView extends ViewPart {
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
 		setDoubleClickAction();
+		setTwoPlusToolsFilteringAction();
+		setMajorityVotingFilteringAction();
+		setUndoFilteringAction();
+		setToolsAccuracyAction();
 		setExportResultsAction();
 		getSite().setSelectionProvider(tableViewer);
 	}
@@ -131,14 +145,22 @@ public class SmellsView extends ViewPart {
 	 * @param detectedSmells the smells detected by the different tools
 	 */
 	public void addDetectedSmells(Map<SmellType, Set<Smell>> detectedSmells) {
-		Set<Smell> fullSetOfSmells = new LinkedHashSet<Smell>();
+		fullSetOfSmells = new LinkedHashSet<Smell>();
 		detectedSmells.forEach( (k,v) -> {
 			fullSetOfSmells.addAll(v);
 		});
 		tableViewer.setInput(fullSetOfSmells);
 		
-		if(fullSetOfSmells.size() > 0)
+		if(fullSetOfSmells.size() > 0) {
 			exportResultsAction.setEnabled(true);
+			twoPlusToolsFiltering.setEnabled(true);
+			majorityVotingFiltering.setEnabled(true);
+			toolsAccuracyAction.setEnabled(true);
+		}
+	}
+	
+	public void setMaxToolCountMap(Map<SmellType, Integer> mapFromSmellNameToMaxToolCount) {
+		this.mapFromSmellNameToMaxToolCount = mapFromSmellNameToMaxToolCount;
 	}
 	
 	/**
@@ -197,6 +219,119 @@ public class SmellsView extends ViewPart {
 		} catch(Exception e) {
 			Utils.openNewMessageDialog("An error occured while trying to display the selected smell. Please try again...");
 		}
+	}
+	
+	/**
+	 * Creates a filter action in order to allow the user to quickly view only the smells that were
+	 * detected by at least 2 detectors.
+	 */
+	private void setTwoPlusToolsFilteringAction() {
+		twoPlusToolsFiltering = new Action() {
+			@Override
+			public void run() {
+				tableViewer.getTable().removeAll();
+				tableViewer.setInput(getTwoPlusToolsFilteredSet());
+				
+				undoFilteringAction.setEnabled(true);
+			}
+		};
+		
+		ImageDescriptor actionImageDescriptor = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+																	new Path("icons/filter.png"),
+																	null));
+		
+		twoPlusToolsFiltering.setToolTipText("Smells Detected by 2+ Tools");
+		twoPlusToolsFiltering.setImageDescriptor(actionImageDescriptor);
+		twoPlusToolsFiltering.setEnabled(false);
+		getViewSite().getActionBars().getToolBarManager().add(twoPlusToolsFiltering);
+	}
+	
+	private Set<Smell> getTwoPlusToolsFilteredSet() {
+		return fullSetOfSmells.stream().filter( smell -> smell.getDetectorNames().split(",").length >= 2).collect(Collectors.toCollection(LinkedHashSet::new));
+	}
+	
+	/**
+	 * Creates a filter action in order to allow the user to quickly view only the smells that were
+	 * detected by >50% of the tools that are able to detect a given smell.
+	 */
+	private void setMajorityVotingFilteringAction() {
+		majorityVotingFiltering = new Action() {
+			@Override
+			public void run() {
+				tableViewer.getTable().removeAll();
+				tableViewer.setInput(getMajorityVotingFilteredSet());
+				
+				undoFilteringAction.setEnabled(true);
+			}
+		};
+		
+		ImageDescriptor actionImageDescriptor = ImageDescriptor.createFromURL(FileLocator.find(Activator.getDefault().getBundle(),
+																	new Path("icons/filter.png"),
+																	null));
+		
+		majorityVotingFiltering.setToolTipText("Smells Detected by >50% of Tools");
+		majorityVotingFiltering.setImageDescriptor(actionImageDescriptor);
+		majorityVotingFiltering.setEnabled(false);
+		getViewSite().getActionBars().getToolBarManager().add(majorityVotingFiltering);
+	}
+	
+	private Set<Smell> getMajorityVotingFilteredSet() {
+		Set<Smell> tempSet = new LinkedHashSet<Smell>();
+		
+		fullSetOfSmells.forEach(smell -> {
+			int maxToolCount = mapFromSmellNameToMaxToolCount.get(smell.getSmellType());
+			int currentToolCount = smell.getDetectorNames().split(",").length;
+			boolean isMajorityVoting = maxToolCount == 1 ?
+										false :
+										currentToolCount > maxToolCount / 2.0;
+			
+			if(isMajorityVoting)
+				tempSet.add(smell);
+		});
+		
+		return tempSet;
+	}
+	
+	/**
+	 * Creates an undo action which can be used in order to remove any applied filtering and
+	 * add all the detected smells back to the view.
+	 */
+	private void setUndoFilteringAction() {
+		undoFilteringAction = new Action() {
+			@Override
+			public void run() {
+				tableViewer.getTable().removeAll();
+				tableViewer.setInput(fullSetOfSmells);
+				
+				this.setEnabled(false);
+			}
+		};
+		
+		undoFilteringAction.setToolTipText("Undo Filtering");
+		undoFilteringAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_UNDO));
+		undoFilteringAction.setEnabled(false);
+		getViewSite().getActionBars().getToolBarManager().add(undoFilteringAction);
+	}
+	
+	/**
+	 * Creates an action which displays a new window to the user, in which precision and recall are calculated and displayed
+	 * based on the selected smell type and gold standard set.
+	 */
+	private void setToolsAccuracyAction() {
+		toolsAccuracyAction = new Action() {
+			@Override
+			public void run() {
+				SmellType[] applicableSmellTypes = mapFromSmellNameToMaxToolCount.entrySet().stream().filter( e -> e.getValue() > 1).map(Map.Entry::getKey).toArray(SmellType[]::new);
+				
+				ToolAccuracyView app = new ToolAccuracyView(applicableSmellTypes, fullSetOfSmells, getTwoPlusToolsFilteredSet(), getMajorityVotingFilteredSet());
+				app.display();
+			}
+		};
+		
+		toolsAccuracyAction.setToolTipText("Tools Accuracy");
+		toolsAccuracyAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD));
+		toolsAccuracyAction.setEnabled(false);
+		getViewSite().getActionBars().getToolBarManager().add(toolsAccuracyAction);
 	}
 	
 	/**
