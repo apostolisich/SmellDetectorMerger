@@ -1,8 +1,10 @@
 # SmellDetectorMerger
 
-SmellDetectorMerger is an Eclipse plug-in which uses a number of code smell detectors (some of which are products of research work) that detect different kinds of code smells. The tool then combines all the detected smells from the different detectors in a single view and displays them to the end user. For each smell the user can see its type, the affected element, as well as a list of names which corresponds to the detectors that spotted this specific smell. An export option is also supported in order to allow the user to export the detection results in a csv file if needed.
+SmellDetectorMerger is an Eclipse plug-in which uses a number of code smell detectors (some of which are products of research work) that detect different kinds of code smells. The plug-in then combines all the detected smells from the different detectors in a single view and displays them to the end user. For each smell the user can see its type, the affected element, as well as a list of names which corresponds to the detectors that spotted this specific smell.
 
-In case the user is interested in getting results from a limited number of detectors, the tool provides this option via a Preference page in Eclipse. Also, the user can select whether they want to detect a specific code smell or all available smells.
+The plug-in supports filtering the detected smells and only display those found by 2+ or >50% of the tools. These filtered results can also be used as gold standard sets, in order to calculate precision and recall for each smell type for all the detectors that can detect it. An export option is also supported in order to allow the user to export the detection results in a csv file if needed.
+
+In case the user is interested in getting results from a limited number of detectors, the plug-in provides this option via a Preference page in Eclipse. Also, the user can select whether they want to detect a specific code smell or all available smells.
 
 ### Available detectors
 * [CheckStyle](https://github.com/checkstyle/checkstyle)
@@ -42,7 +44,3 @@ In order to install the tool in Eclipse, follow the steps below:
 4. Open Eclipse and select _File -> Restart_ from the menu to make sure it's refreshed
 
 After completing the previous steps, the tool can run by right-clicking the root folder of the desired project and selecting _SmellDetectorMerger_ followed by the desired smell to be detected.
-
-The tool also offers the option to specify which detectors will be used for the detection (all are used by default). After the tool is installed as mentioned previously, an extra Preference Page should appear in _Window -> Preferences_ as shown below:
-
-![image](https://user-images.githubusercontent.com/22786832/140609616-fbca5c35-730c-45b2-87db-cc992ab32a8f.png)
