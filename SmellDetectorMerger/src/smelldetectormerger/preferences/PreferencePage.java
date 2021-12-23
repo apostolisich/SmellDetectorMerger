@@ -72,7 +72,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(pmd);
 		addField(organic);
 		
-		if(scopedPreferences.getString(PreferenceConstants.USE_ALL_DETECTORS).equals("yes"))
+		if(!scopedPreferences.contains(PreferenceConstants.USE_ALL_DETECTORS)
+				|| (scopedPreferences.contains(PreferenceConstants.USE_ALL_DETECTORS) && scopedPreferences.getString(PreferenceConstants.USE_ALL_DETECTORS).equals(("yes"))))
 			toggleDetectorsSelectionAvailability(true);
 	}
 	
