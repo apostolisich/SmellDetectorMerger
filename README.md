@@ -2,7 +2,7 @@
 
 SmellDetectorMerger is an Eclipse plug-in which uses a number of code smell detectors (some of which are products of research work) that detect different kinds of code smells. The plug-in then combines all the detected smells from the different detectors in a single view and displays them to the end user. For each smell the user can see its type, the affected element, as well as a list of names which corresponds to the detectors that spotted this specific smell.
 
-The plug-in supports filtering the detected smells and only display those found by 2+ or >50% of the tools. These filtered results can also be used as gold standard sets, in order to calculate precision and recall for each smell type for all the detectors that can detect it. An export option is also supported in order to allow the user to export the detection results in a csv file if needed.
+The plug-in supports filtering the detected smells and only display those found by >=2 or >50% of the tools. These filtered results can also be used as gold standard sets, in order to calculate precision and recall for each smell type for all the detectors that can detect it. An export option is also supported in order to allow the user to export the detection results in a csv file if needed.
 
 In case the user is interested in getting results from a limited number of detectors, the plug-in provides this option via a Preference page in Eclipse. Also, the user can select whether they want to detect a specific code smell or all available smells.
 
