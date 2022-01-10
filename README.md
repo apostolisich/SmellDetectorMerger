@@ -6,7 +6,7 @@ The plug-in supports filtering the detected smells and only display those found 
 
 In case the user is interested in getting results from a limited number of detectors, the plug-in provides this option via a Preference page in Eclipse. Also, the user can select whether they want to detect a specific code smell or all available smells.
 
-### Available detectors
+# Available detectors
 * [CheckStyle](https://github.com/checkstyle/checkstyle)
 * [DuDe](https://wettel.github.io/dude.html)
 * [PMD](https://github.com/pmd/pmd)
@@ -14,7 +14,7 @@ In case the user is interested in getting results from a limited number of detec
 * [JSpIRIT](https://github.com/hcvazquez/JSpIRIT)
 * [Organic](https://github.com/opus-research/organic)
 
-### Supported code smells
+# Supported code smells
 * God Class _(CheckStyle, PMD, JDeodorant, JSpIRIT, Organic)_
 * Long Method _(CheckStyle, PMD, JDeodorant, JSpIRIT, Organic)_
 * Long Parameter List _(CheckStyle, PMD, Organic)_
@@ -36,7 +36,7 @@ In case the user is interested in getting results from a limited number of detec
 * Speculative Generality _(Organic)_
 * Spaghetti Code _(Organic)_
 
-### Installation
+# Installation
 In order to install the tool in Eclipse, follow the steps below:
 1. Download the jar file of the tool from the latest release
 2. Close Eclipse (in case there is an instance open)
