@@ -151,7 +151,7 @@ public class ToolAccuracyView {
         goldStandardGroup.setText("Gold Standard Set");
         
         twoToolsSetButton = new Button(goldStandardGroup, SWT.RADIO);
-        twoToolsSetButton.setText("Smells Detected by 2+ Tools");
+        twoToolsSetButton.setText("Smells Detected by >=2 Tools");
         twoToolsSetButton.addSelectionListener(new SelectionAdapter() {
         	@Override
             public void widgetSelected(final SelectionEvent e){

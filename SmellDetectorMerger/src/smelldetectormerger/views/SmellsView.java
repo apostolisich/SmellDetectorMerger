@@ -240,7 +240,7 @@ public class SmellsView extends ViewPart {
 																	new Path("icons/filter.png"),
 																	null));
 		
-		twoPlusToolsFiltering.setToolTipText("Smells Detected by 2+ Tools");
+		twoPlusToolsFiltering.setToolTipText("Smells Detected by >=2 Tools");
 		twoPlusToolsFiltering.setImageDescriptor(actionImageDescriptor);
 		twoPlusToolsFiltering.setEnabled(false);
 		getViewSite().getActionBars().getToolBarManager().add(twoPlusToolsFiltering);
