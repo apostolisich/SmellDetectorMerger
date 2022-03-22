@@ -38,7 +38,7 @@ In case the user is interested in getting results from a limited number of detec
 
 # Installation
 In order to install the tool in Eclipse, follow the steps below:
-1. Download the jar file of the tool from the latest release
+1. Download the jar file of the tool from the latest release [here](https://github.com/apostolisich/SmellDetectorMerger/releases)
 2. Close Eclipse (in case there is an instance open)
 3. Copy the downloaded jar file and paste it in the _dropins_ folder (it is located in the installation directory of Eclipse)
 4. Open Eclipse and select _File -> Restart_ from the menu to make sure it's refreshed
