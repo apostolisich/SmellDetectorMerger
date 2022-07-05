@@ -48,4 +48,4 @@ In order to install the tool in Eclipse, follow the steps below:
 After completing the previous steps, the tool can run by right-clicking the root folder of the desired project and selecting _SmellDetectorMerger_ followed by the desired smell to be detected.
 
 # TechDebt 2022
-A paper was written to showcase the plugin, comparing the detection results of the underlying tools. This was accepted, among other papers, for presentation in the [TechDebt 2022 conference](https://2022.techdebtconf.org/details/TechDebt-2022-tools-track/1/Merging-Smell-Detectors-Evidence-on-the-Agreement-of-Multiple-Tools), an international conference related to Technical Debt.
+A paper was written to showcase the plugin, comparing the detection results of the underlying tools. This was accepted, among other papers, for presentation in the [TechDebt 2022 conference](https://2022.techdebtconf.org/details/TechDebt-2022-tools-track/1/Merging-Smell-Detectors-Evidence-on-the-Agreement-of-Multiple-Tools), an international conference related to Technical Debt. The paper can be found [here](https://ieeexplore.ieee.org/document/9804506).
